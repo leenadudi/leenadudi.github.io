@@ -364,7 +364,7 @@ export default function App() {
               from the moment the screen slides in (while the lines are still
               vertical), then fades as the wave takes over */}
           <Caption p={p2} at={-0.03} fadeOut={0.1} x="90%" y="8%" rot={90}>breathe in</Caption>
-          <Caption p={p2} at={0.55} x="82%" y="22%" rot={-8}>and out</Caption>
+          <Caption p={p2} at={0.35} x="82%" y="22%" rot={-8}>and out</Caption>
           <Caption p={p2} at={0.88} x="20%" y="55%" rot={90}>everyone deserves a break</Caption>
         </div>
       </div>
