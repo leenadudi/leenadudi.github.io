@@ -1,12 +1,21 @@
-import { useRef, useLayoutEffect, useState } from "react";
+import { useRef, useLayoutEffect, useState, lazy, Suspense } from "react";
 import { useScroll } from "motion/react";
+const VibeGraphEmbed = lazy(() => import("./components/VibeGraphEmbed"));
 
 const SECTIONS = [
   { id: "work",     title: "experience", color: "#f56483ff" },
-  { id: "projects", title: "projects",        color: "#fea100ff" },
-  { id: "research", title: "school",        color: "#c66724ff" },
-  { id: "service",  title: "service",         color: "#15484cff" },
-  { id: "hobbies",  title: "hobbies",         color: "#31bab2ff" },
+  { id: "projects", title: "projects",   color: "#fea100ff" },
+  { id: "research", title: "school",     color: "#c66724ff" },
+  { id: "service",  title: "service",    color: "#15484cff" },
+  { id: "hobbies",  title: "hobbies",    color: "#31bab2ff" },
+];
+
+const SECTION_CONTENT = [
+  { bullets: ["role · company · 2024", "role · company · 2023", "role · company · 2022"],         visual: "timeline" },
+  { bullets: ["Spotify Vibe Graph · data viz · 2025", "project · description", "project · description"], visual: "screenshots" },
+  { bullets: ["university · degree · year", "coursework & research focus", "awards & highlights"], visual: "skills map" },
+  { bullets: ["org · role · duration", "org · role · duration", "impact summary"],                 visual: "impact map" },
+  { bullets: ["rock climbing · indoor & outdoor", "ceramics · hand-building & glazing", "rollercoasters · obviously"], visual: "photos" },
 ];
 
 const VW = 1000;
@@ -15,15 +24,15 @@ const K  = 0.5523;
 const SW = 20;
 
 // ── Phase 1 geometry ─────────────────────────────────────────────────────────
-const LINE_Y     = [278, 315, 352, 389, 426] as const;
+const LINE_Y     = [278, 301, 324, 347, 370] as const;
 const APP_X      = 365;   // x where the flat strands start curving up into the loop
 // Each strand makes its OWN loop; centres are stacked upward and leaned slightly
 // right so the five rings nest into an interlocking tower (pink top → teal front).
 const LOOP_R     = 58;                              // ring radius (equal → clean nested rings)
 const LOOP_CX    = [605, 615, 625, 635, 645] as const;
-const LOOP_CY    = [120, 154, 188, 222, 256] as const;
+const LOOP_CY    = [120, 143, 166, 189, 212] as const;
 const WAVE_END_X = 870;
-const WAVE_TOP_Y = [18, 52, 86, 120, 154] as const;
+const WAVE_TOP_Y = [18, 41, 64, 87, 110] as const;
 const DESCENT_R  = [45, 65, 85, 105, 125] as const;
 // Each line's x on the right wall
 const DX = DESCENT_R.map(dr => WAVE_END_X + dr); // [915,935,955,975,995]
@@ -283,6 +292,7 @@ export default function App() {
   });
 
   const nameOpacity = Math.max(0, 1 - p1 * 10);
+  const [activeSection, setActiveSection] = useState<number | null>(null);
 
   // Phase 2 draws from the moment it enters — the path starts with the
   // vertical stripe segment so the stripe above the wave is always the
@@ -322,7 +332,7 @@ export default function App() {
             })}
           </svg>
           <Caption p={p1} at={0.1}  x="3%"  y="39%">i love rollercoasters :)</Caption>
-          <Caption p={p1} at={0.3}  x="42%" y="73%" rot={-20}>wanna take a ride with me?</Caption>
+          <Caption p={p1} at={0.3}  x="42%" y="65%" rot={-20}>wanna take a ride with me?</Caption>
           <Caption p={p1} at={0.7} x="95%" y="6%"  rot={58} size="clamp(1.2rem,2.4vw,2rem)">weeeee</Caption>
           <div className="absolute bottom-0 left-0 h-px z-40" style={{
             width:`${p1*100}%`,
@@ -364,7 +374,7 @@ export default function App() {
               from the moment the screen slides in (while the lines are still
               vertical), then fades as the wave takes over */}
           <Caption p={p2} at={-0.03} fadeOut={0.1} x="90%" y="8%" rot={90}>breathe in</Caption>
-          <Caption p={p2} at={0.35} x="82%" y="22%" rot={-8}>and out</Caption>
+          <Caption p={p2} at={0.25} x="82%" y="22%" rot={-8}>and out</Caption>
           <Caption p={p2} at={0.88} x="20%" y="55%" rot={90}>everyone deserves a break</Caption>
         </div>
       </div>
@@ -453,19 +463,91 @@ export default function App() {
           <Caption p={p3} at={0.08} fadeOut={0.52} x="20%"  y="15%">hope you enjoyed the ride!</Caption>
           <Caption p={p3} at={0.3}  fadeOut={0.52} x="65%" y="25%">now more about me…</Caption>
 
-          {/* Column labels — fade in once columns reach full width */}
-          <div className="absolute inset-0 flex pointer-events-none"
-            style={{ opacity: p3LabelOpacity }}>
-            {SECTIONS.map((s) => (
-              <div key={`label-${s.id}`}
-                className="flex-1 flex items-center justify-center text-center px-4"
-                style={{ color: labelColor(s.color),
-                  fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 500,
-                  fontSize: "clamp(1.1rem,2.5vw,2.1rem)", lineHeight: 1.08,
-                  letterSpacing: "-0.01em", textTransform: "lowercase" }}>
-                {s.title}
-              </div>
-            ))}
+          {/* Interactive column layer — fades in with animation, handles expand/collapse */}
+          <div className="absolute inset-0 flex"
+            style={{ opacity: p3LabelOpacity, pointerEvents: p3LabelOpacity > 0 ? "auto" : "none" }}>
+            {SECTIONS.map((s, i) => {
+              const isActive   = activeSection === i;
+              const isCollapsed = activeSection !== null && !isActive;
+              return (
+                <div
+                  key={`icol-${s.id}`}
+                  onClick={() => setActiveSection(isActive ? null : i)}
+                  style={{
+                    flex: isActive ? 5 : isCollapsed ? 0.28 : 1,
+                    background: s.color,
+                    overflow: "hidden",
+                    cursor: "pointer",
+                    position: "relative",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    transition: "flex 0.48s cubic-bezier(0.4,0,0.2,1)",
+                  }}
+                >
+                  {/* Label — only visible in default state */}
+                  <span style={{
+                    fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 500,
+                    fontSize: "clamp(1.1rem,2.5vw,2.1rem)", lineHeight: 1.08,
+                    letterSpacing: "-0.01em", textTransform: "lowercase",
+                    color: labelColor(s.color),
+                    pointerEvents: "none",
+                    opacity: activeSection === null ? 1 : 0,
+                    transition: "opacity 0.15s ease",
+                    position: "relative", zIndex: 1,
+                  }}>
+                    {s.title}
+                  </span>
+
+                  {/* Expanded content */}
+                  <div style={{
+                    position: "absolute", inset: 0,
+                    padding: "clamp(1.5rem,3vw,2.5rem)",
+                    opacity: isActive ? 1 : 0,
+                    transition: "opacity 0.25s ease 0.12s",
+                    pointerEvents: isActive ? "auto" : "none",
+                    display: "flex", flexDirection: "column", gap: "1.25rem",
+                    color: labelColor(s.color), overflow: "hidden",
+                  }}>
+                    <div style={{
+                      fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 600,
+                      fontSize: "clamp(1.2rem,2.5vw,1.9rem)", letterSpacing: "-0.02em", lineHeight: 1.05,
+                    }}>
+                      {s.title}
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem", flex: 1, minHeight: 0 }}>
+                      <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", justifyContent: "center", gap: "0.5rem" }}>
+                        {SECTION_CONTENT[i].bullets.map((b, j) => (
+                          <li key={j} style={{ fontSize: "clamp(0.75rem,1.5vw,0.88rem)", paddingLeft: "0.85rem", position: "relative", opacity: 0.9 }}>
+                            <span style={{ position: "absolute", left: 0, opacity: 0.55 }}>·</span>
+                            {b}
+                          </li>
+                        ))}
+                      </ul>
+                      {i === 1 ? (
+                        <Suspense fallback={
+                          <div style={{ borderRadius:"8px", background:"rgba(255,255,255,0.12)",
+                            display:"flex", alignItems:"center", justifyContent:"center",
+                            fontSize:"0.65rem", letterSpacing:"0.1em", textTransform:"uppercase", opacity:0.45 }}>
+                            loading graph…
+                          </div>
+                        }>
+                          <VibeGraphEmbed />
+                        </Suspense>
+                      ) : (
+                        <div style={{
+                          borderRadius: "8px", background: "rgba(255,255,255,0.12)",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          fontSize: "0.65rem", letterSpacing: "0.1em", textTransform: "uppercase", opacity: 0.55,
+                        }}>
+                          {SECTION_CONTENT[i].visual}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
