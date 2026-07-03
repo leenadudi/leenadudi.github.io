@@ -11,11 +11,31 @@ const SECTIONS = [
 ];
 
 const SECTION_CONTENT = [
-  { bullets: ["role · company · 2024", "role · company · 2023", "role · company · 2022"],         visual: "timeline" },
-  { bullets: ["Spotify Vibe Graph · data viz · 2025", "project · description", "project · description"], visual: "screenshots" },
-  { bullets: ["university · degree · year", "coursework & research focus", "awards & highlights"], visual: "skills map" },
-  { bullets: ["org · role · duration", "org · role · duration", "impact summary"],                 visual: "impact map" },
-  { bullets: ["rock climbing · indoor & outdoor", "ceramics · hand-building & glazing", "rollercoasters · obviously"], visual: "photos" },
+  { bullets: [
+      "Agent Vista · agentic AI + LLMs · 2026–present",
+      "NASA Earth Sciences · wildfire ML research · Summer 2024",
+      "Bungii · delivery analytics · 2025  ·  Kiewit · financial data · 2023",
+    ], visual: "timeline" },
+  { bullets: [
+      "Spotify Vibe Graph · knowledge graph + UMAP · 2025",
+      "ClerkFlow · civic SaaS for local government · 2025–present",
+      "NASA wildfire risk app · Flutter + YOLOv8 + TFLite · 2024",
+    ], visual: "screenshots" },
+  { bullets: [
+      "MIT · BS CS (AI & Decision Making) + Physics · Class of 2029",
+      "U.S. Presidential Scholar  ·  National Merit Scholar  ·  ACT 36/36",
+      "MIT Lincoln Lab LLRISE · NASA AGU Conference '24 · Disney Dreamer",
+    ], visual: "skills map" },
+  { bullets: [
+      "FIFA + MIT Sports Lab · referee last-touch ML model · 2025–present",
+      "MIT Urban Risk Lab · geospatial AI + Google Earth Engine · Fall 2025",
+      "Heartland STEM 501c3 President · Million Girls Moonshot Mentor · FTC Captain",
+    ], visual: "impact map" },
+  { bullets: [
+      "rock climbing · indoor & outdoor",
+      "ceramics · hand-building & glazing",
+      "rollercoasters · obviously",
+    ], visual: "photos" },
 ];
 
 const VW = 1000;
