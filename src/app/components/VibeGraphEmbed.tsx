@@ -13,26 +13,25 @@ function clusterColor(c: number): string {
   return CLUSTER_COLORS[c] ?? "#888";
 }
 
-function sizeScale(ms: number, allMs: number[]): number {
-  let lo = Infinity, hi = -Infinity;
-  for (const m of allMs) { if (m < lo) lo = m; if (m > hi) hi = m; }
-  if (!isFinite(lo) || hi === lo) return 3;
+function sizeScale(ms: number, lo: number, hi: number): number {
+  if (hi === lo) return 4;
   const t = (Math.log(ms + 1) - Math.log(lo + 1)) / (Math.log(hi + 1) - Math.log(lo + 1));
-  return 2 + t * 10;  // range 2–12, smaller than original to reduce overlap
+  return 3 + t * 11; // 3–14px
 }
 
 interface Tip { x: number; y: number; label: string; sub: string }
 
 export default function VibeGraphEmbed() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [tip, setTip] = useState<Tip | null>(null);
-  const sigmaRef = useRef<Sigma | null>(null);
+  const sigmaRef     = useRef<Sigma | null>(null);
+  const [tip, setTip]   = useState<Tip | null>(null);
 
   const communities = (snapshotData.communities as { id: number; label: string; size: number }[])
     .sort((a, b) => b.size - a.size);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    const el = containerRef.current;
+    if (!el) return;
 
     const trackNodes = (snapshotData.nodes as {
       id: string; type: string; name: string; artist: string | null;
@@ -40,99 +39,127 @@ export default function VibeGraphEmbed() {
     }[]).filter(n => n.type === "track");
 
     const allMs = trackNodes.map(n => n.msPlayed);
+    const lo = Math.min(...allMs), hi = Math.max(...allMs);
 
-    const graph = new Graph({ type: "undirected", multi: false, allowSelfLoops: false });
-    trackNodes.forEach(n => {
-      graph.addNode(n.id, {
-        label: n.artist ? `${n.artist} — ${n.name}` : n.name,
-        x: n.x,
-        y: n.y,
-        size: sizeScale(n.msPlayed, allMs),
-        color: clusterColor(n.community),
-        community: n.community,
-        msPlayed: n.msPlayed,
+    let sigma: Sigma | null = null;
+    let hoverComm: number | null = null;
+    let resizeTimer = 0;
+    let initialized = false;
+
+    function buildGraph(): Graph {
+      const g = new Graph({ type: "undirected", multi: false, allowSelfLoops: false });
+      trackNodes.forEach(n => {
+        g.addNode(n.id, {
+          label: n.artist ? `${n.artist} — ${n.name}` : n.name,
+          x: n.x, y: n.y,
+          size: sizeScale(n.msPlayed, lo, hi),
+          color: clusterColor(n.community),
+          community: n.community,
+          msPlayed: n.msPlayed,
+        });
       });
-    });
-    for (const e of snapshotData.edges as { source: string; target: string; weight: number }[]) {
-      if (graph.hasNode(e.source) && graph.hasNode(e.target) && !graph.hasEdge(e.source, e.target))
-        graph.addEdge(e.source, e.target, { weight: e.weight });
+      for (const e of snapshotData.edges as { source: string; target: string; weight: number }[]) {
+        if (g.hasNode(e.source) && g.hasNode(e.target) && !g.hasEdge(e.source, e.target))
+          g.addEdge(e.source, e.target, { weight: e.weight });
+      }
+      return g;
     }
 
-    const sigma = new Sigma(graph, containerRef.current, {
-      defaultEdgeColor: "rgba(255,255,255,0.06)",
-      renderEdgeLabels: false,
-      // Only show labels for nodes that are visually large enough (zoom in to read)
-      labelRenderedSizeThreshold: 10,
-      labelSize: 11,
-      labelColor: { color: "#f5f0e8" },
-    });
-    sigmaRef.current = sigma;
+    function initSigma() {
+      if (initialized) return;
+      if ((el.offsetWidth ?? 0) < 120 || (el.offsetHeight ?? 0) < 120) return;
+      initialized = true;
 
-    const labelById = new Map<number, string>(
-      communities.map(c => [c.id, c.label])
-    );
-    const commOf = (node: string) => Number(graph.getNodeAttribute(node, "community"));
-    let hoverComm: number | null = null;
+      const graph = buildGraph();
+      const labelById = new Map<number, string>(communities.map(c => [c.id, c.label]));
+      const commOf = (node: string) => Number(graph.getNodeAttribute(node, "community"));
 
-    sigma.setSetting("nodeReducer", (node, data) => {
-      if (hoverComm !== null && commOf(node) !== hoverComm)
-        return { ...data, color: "#1e1e2a", label: "", zIndex: 0 };
-      return data;
-    });
-    sigma.setSetting("edgeReducer", (edge, data) => {
-      if (hoverComm !== null &&
-          (commOf(graph.source(edge)) !== hoverComm || commOf(graph.target(edge)) !== hoverComm))
-        return { ...data, hidden: true };
-      return data;
-    });
-
-    sigma.on("enterNode", ({ node }) => {
-      const attr = graph.getNodeAttributes(node);
-      const disp = sigma.getNodeDisplayData(node);
-      const vp = disp ? sigma.graphToViewport(disp) : { x: 0, y: 0 };
-      hoverComm = commOf(node);
-      sigma.refresh();
-      const hrs = (Number(attr.msPlayed) / 3_600_000).toFixed(1);
-      setTip({
-        x: vp.x, y: vp.y,
-        label: String(attr.label),
-        sub: `${labelById.get(hoverComm) ?? "cluster"} · ${hrs}h listened`,
+      sigma = new Sigma(graph, el, {
+        defaultEdgeColor: "rgba(255,255,255,0.06)",
+        renderEdgeLabels: false,
+        labelRenderedSizeThreshold: 12,
+        labelSize: 11,
+        labelColor: { color: "#f5f0e8" },
       });
-    });
-    sigma.on("leaveNode", () => { hoverComm = null; sigma.refresh(); setTip(null); });
+      sigmaRef.current = sigma;
 
-    sigma.on("clickNode", ({ node }) => {
-      const comm = commOf(node);
-      const pts: { x: number; y: number }[] = [];
-      for (const n of graph.filterNodes(n => commOf(n) === comm)) {
-        const d = sigma.getNodeDisplayData(n);
-        if (d) pts.push({ x: d.x, y: d.y });
-      }
-      if (!pts.length) return;
-      let mnX = Infinity, mnY = Infinity, mxX = -Infinity, mxY = -Infinity;
-      for (const p of pts) { mnX = Math.min(mnX, p.x); mnY = Math.min(mnY, p.y); mxX = Math.max(mxX, p.x); mxY = Math.max(mxY, p.y); }
-      const span = Math.max(mxX - mnX, mxY - mnY, 0.01);
-      const ratio = Math.min(1, Math.max(0.05, span / 0.7));
-      sigma.getCamera().animate({ x: (mnX + mxX) / 2, y: (mnY + mxY) / 2, ratio }, { duration: 600 });
-    });
-    sigma.on("clickStage", () => {
-      hoverComm = null; sigma.refresh();
-      sigma.getCamera().animatedReset({ duration: 500 });
-    });
+      sigma.setSetting("nodeReducer", (node, data) => {
+        if (hoverComm !== null && commOf(node) !== hoverComm)
+          return { ...data, color: "#1e1e2a", label: "", zIndex: 0 };
+        return data;
+      });
+      sigma.setSetting("edgeReducer", (edge, data) => {
+        if (hoverComm !== null &&
+            (commOf(graph.source(edge)) !== hoverComm || commOf(graph.target(edge)) !== hoverComm))
+          return { ...data, hidden: true };
+        return data;
+      });
 
-    return () => { sigma.kill(); sigmaRef.current = null; setTip(null); };
+      sigma.on("enterNode", ({ node }) => {
+        const attr = graph.getNodeAttributes(node);
+        const disp = sigma!.getNodeDisplayData(node);
+        const vp   = disp ? sigma!.graphToViewport(disp) : { x: 0, y: 0 };
+        hoverComm = commOf(node);
+        sigma!.refresh();
+        const hrs = (Number(attr.msPlayed) / 3_600_000).toFixed(1);
+        setTip({ x: vp.x, y: vp.y,
+          label: String(attr.label),
+          sub: `${labelById.get(hoverComm) ?? "cluster"} · ${hrs}h listened` });
+      });
+      sigma.on("leaveNode", () => { hoverComm = null; sigma!.refresh(); setTip(null); });
+
+      sigma.on("clickNode", ({ node }) => {
+        const comm = commOf(node);
+        const pts: { x: number; y: number }[] = [];
+        for (const n of graph.filterNodes(n => commOf(n) === comm)) {
+          const d = sigma!.getNodeDisplayData(n);
+          if (d) pts.push({ x: d.x, y: d.y });
+        }
+        if (!pts.length) return;
+        let mnX = Infinity, mnY = Infinity, mxX = -Infinity, mxY = -Infinity;
+        for (const p of pts) { mnX = Math.min(mnX, p.x); mnY = Math.min(mnY, p.y); mxX = Math.max(mxX, p.x); mxY = Math.max(mxY, p.y); }
+        const span = Math.max(mxX - mnX, mxY - mnY, 0.01);
+        const ratio = Math.min(1, Math.max(0.05, span / 0.7));
+        sigma!.getCamera().animate({ x: (mnX + mxX) / 2, y: (mnY + mxY) / 2, ratio }, { duration: 600 });
+      });
+      sigma.on("clickStage", () => {
+        hoverComm = null; sigma!.refresh();
+        sigma!.getCamera().animatedReset({ duration: 500 });
+      });
+    }
+
+    // Wait for the column to finish expanding before initializing Sigma.
+    // The ResizeObserver fires as the flex animation runs; once the container
+    // is large enough we init once, then just call resize() on subsequent changes.
+    const ro = new ResizeObserver(() => {
+      clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(() => {
+        if (!initialized) { initSigma(); return; }
+        sigma?.resize();
+      }, 30);
+    });
+    ro.observe(el);
+    initSigma(); // also try immediately
+
+    return () => {
+      ro.disconnect();
+      clearTimeout(resizeTimer);
+      sigma?.kill();
+      sigmaRef.current = null;
+      setTip(null);
+    };
   }, []);
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%", borderRadius: 8, overflow: "hidden", background: "#0d0e14" }}>
-      {/* canvas */}
       <div ref={containerRef} style={{ position: "absolute", inset: 0 }} />
 
       {/* cluster legend */}
       <div style={{
         position: "absolute", top: 8, right: 8, bottom: 8,
-        width: 148, overflowY: "auto", background: "rgba(10,10,20,0.72)",
-        borderRadius: 6, padding: "8px 10px", zIndex: 2,
+        width: 148, overflowY: "auto",
+        background: "rgba(10,10,20,0.72)", borderRadius: 6,
+        padding: "8px 10px", zIndex: 2,
         display: "flex", flexDirection: "column", gap: 2,
       }}>
         <div style={{ fontWeight: 600, fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: "#aaa", marginBottom: 4 }}>
@@ -159,15 +186,14 @@ export default function VibeGraphEmbed() {
         Reset view
       </button>
 
-      {/* hint */}
       <div style={{
         position: "absolute", bottom: 10, left: "50%", transform: "translateX(-50%)",
-        color: "rgba(255,255,255,0.3)", fontSize: 10, pointerEvents: "none", zIndex: 2, whiteSpace: "nowrap",
+        color: "rgba(255,255,255,0.3)", fontSize: 10, pointerEvents: "none",
+        zIndex: 2, whiteSpace: "nowrap",
       }}>
-        hover to highlight · click to zoom cluster · scroll to explore
+        hover to highlight · click to zoom cluster
       </div>
 
-      {/* tooltip */}
       {tip && (
         <div style={{
           position: "absolute", left: tip.x + 12, top: tip.y + 12,
