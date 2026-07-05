@@ -119,6 +119,11 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+@keyframes scroll-nudge-bounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(7px); }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

@@ -1,4 +1,4 @@
-import { useRef, useLayoutEffect, useState, lazy, Suspense } from "react";
+import { useRef, useLayoutEffect, useState, useEffect, lazy, Suspense } from "react";
 import { useScroll } from "motion/react";
 const VibeGraphEmbed = lazy(() => import("./components/VibeGraphEmbed"));
 
@@ -32,8 +32,8 @@ const SECTION_CONTENT = [
       "Heartland STEM 501c3 President · Million Girls Moonshot Mentor · FTC Captain",
     ], visual: "impact map" },
   { bullets: [
-      "rock climbing · indoor & outdoor",
-      "ceramics · hand-building & glazing",
+      "basketball",
+      "singing",
       "rollercoasters · obviously",
     ], visual: "photos" },
 ];
@@ -314,6 +314,14 @@ export default function App() {
   const nameOpacity = Math.max(0, 1 - p1 * 10);
   const [activeSection, setActiveSection] = useState<number | null>(null);
 
+  // Scroll nudge — appears 2s after load, fades as soon as user scrolls
+  const [nudgeVisible, setNudgeVisible] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setNudgeVisible(true), 2000);
+    return () => clearTimeout(t);
+  }, []);
+  const scrollHintOpacity = nudgeVisible ? Math.max(0, 1 - p1 * 25) : 0;
+
   // Phase 2 draws from the moment it enters — the path starts with the
   // vertical stripe segment so the stripe above the wave is always the
   // "already drawn" portion of the animated path (no static lines needed).
@@ -358,8 +366,49 @@ export default function App() {
             width:`${p1*100}%`,
             background:"linear-gradient(90deg,#F04878,#F09820,#A85C2A,#2D9B68,#2898A8)",
             opacity:Math.min(1,p1*6) }} />
+
+          {/* Scroll nudge — fades in after 2s, vanishes as soon as scrolling starts */}
+          <div className="absolute bottom-10 left-1/2 z-30 pointer-events-none flex flex-col items-center gap-2"
+            style={{ transform: "translateX(-50%)", opacity: scrollHintOpacity, transition: "opacity 0.5s ease" }}>
+            <span style={{ fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:"0.65rem",
+              letterSpacing:"0.18em", textTransform:"uppercase", color:"#15484c", opacity:0.45 }}>
+              scroll
+            </span>
+            <div style={{ animation: "scroll-nudge-bounce 1.8s ease-in-out infinite" }}>
+              <svg width="22" height="14" viewBox="0 0 22 14" fill="none">
+                <path d="M2 2L11 11L20 2" stroke="#15484c" strokeOpacity="0.4" strokeWidth="2"
+                  strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Skip to portfolio — fixed pill, appears after a little scroll, hides once portfolio is live */}
+      <button
+        onClick={() => p3Ref.current?.scrollIntoView({ behavior: "smooth" })}
+        style={{
+          position: "fixed", bottom: "1.5rem", left: "50%",
+          transform: "translateX(-50%)",
+          zIndex: 9999,
+          background: "rgba(21,72,76,0.82)",
+          color: "#FDF6EC",
+          border: "1px solid rgba(255,255,255,0.12)",
+          borderRadius: "2rem",
+          padding: "0.5rem 1.35rem",
+          fontSize: "0.75rem",
+          fontFamily: "'Plus Jakarta Sans', sans-serif",
+          letterSpacing: "0.05em",
+          cursor: "pointer",
+          backdropFilter: "blur(10px)",
+          opacity: p1 > 0.06 && p3LabelOpacity < 0.8 ? 1 : 0,
+          pointerEvents: p1 > 0.06 && p3LabelOpacity < 0.8 ? "auto" : "none",
+          transition: "opacity 0.4s ease",
+          whiteSpace: "nowrap",
+        }}
+      >
+        skip to portfolio →
+      </button>
 
       {/* ── Phase 2: right-wall stripes + sinusoidal wave animation ── */}
       <div ref={p2Ref} className="relative" style={{ height: "400vh" }}>
