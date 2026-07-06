@@ -37,61 +37,68 @@ function Card({ item, ink }: { item: Item; ink: string }) {
   const hasMedia = media.length > 0;
 
   return (
-    <div className="pg-tile" style={{
+    // stopPropagation on the card prevents ALL clicks inside from collapsing the section column
+    <div className="pg-tile" onClick={e => e.stopPropagation()} style={{
       background: "rgba(255,255,255,0.11)", border: "1px solid rgba(255,255,255,0.16)",
       borderRadius: "14px", padding: "clamp(0.85rem,1.6vw,1.15rem)",
     }}>
-      <div style={{ display: "grid", gridTemplateColumns: "clamp(64px,16%,96px) 1fr",
-        gap: "1rem", alignItems: "center" }}>
-        <div className="pg-tile-art" style={{ width: "100%", aspectRatio: "1 / 1" }}>
-          <ItemVisual art={item.art} ink={ink} />
-        </div>
-        <div style={{ minWidth: 0 }}>
-          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", gap: "0.5rem" }}>
-            <span style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 600,
-              fontSize: "clamp(0.92rem,1.8vw,1.12rem)", letterSpacing: "-0.01em" }}>{item.title}</span>
-            {item.meta && (
-              <span style={{ fontSize: "clamp(0.6rem,1.2vw,0.72rem)", opacity: 0.65 }}>{item.meta}</span>
-            )}
+      <div style={{ display: "flex", gap: "1rem", alignItems: "stretch" }}>
+
+        {/* ── left: art + title + bullets + toggle ── */}
+        <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: "0.7rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "clamp(52px,13%,80px) 1fr",
+            gap: "0.85rem", alignItems: "center" }}>
+            <div className="pg-tile-art" style={{ width: "100%", aspectRatio: "1 / 1" }}>
+              <ItemVisual art={item.art} ink={ink} />
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", gap: "0.5rem" }}>
+                <span style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 600,
+                  fontSize: "clamp(0.92rem,1.8vw,1.12rem)", letterSpacing: "-0.01em" }}>{item.title}</span>
+                {item.meta && (
+                  <span style={{ fontSize: "clamp(0.6rem,1.2vw,0.72rem)", opacity: 0.65 }}>{item.meta}</span>
+                )}
+              </div>
+              <ul style={{ listStyle: "none", padding: 0, margin: "0.45rem 0 0",
+                display: "flex", flexDirection: "column", gap: "0.32rem" }}>
+                {item.bullets.map((b, j) => (
+                  <li key={j} style={{ position: "relative", paddingLeft: "0.9rem",
+                    fontSize: "clamp(0.72rem,1.35vw,0.85rem)", lineHeight: 1.42,
+                    opacity: item.todo ? 0.62 : 0.9, fontStyle: item.todo ? "italic" : "normal" }}>
+                    <span style={{ position: "absolute", left: 0, opacity: 0.55 }}>·</span>{b}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
-          <ul style={{ listStyle: "none", padding: 0, margin: "0.45rem 0 0",
-            display: "flex", flexDirection: "column", gap: "0.32rem" }}>
-            {item.bullets.map((b, j) => (
-              <li key={j} style={{ position: "relative", paddingLeft: "0.9rem",
-                fontSize: "clamp(0.72rem,1.35vw,0.85rem)", lineHeight: 1.42,
-                opacity: item.todo ? 0.62 : 0.9, fontStyle: item.todo ? "italic" : "normal" }}>
-                <span style={{ position: "absolute", left: 0, opacity: 0.55 }}>·</span>{b}
-              </li>
+
+          {/* attachment toggle */}
+          {hasMedia ? (
+            <button className="pg-chip" onClick={() => setOpen(o => !o)}
+              style={{ alignSelf: "flex-start", border: "none", cursor: "pointer",
+                background: "rgba(255,255,255,0.2)", color: ink, padding: "7px 14px",
+                borderRadius: "20px", fontSize: "0.72rem", fontFamily: "'Plus Jakarta Sans',sans-serif",
+                letterSpacing: "0.02em" }}>
+              {open ? "▾ hide" : toggleLabel(media)}
+            </button>
+          ) : (
+            <div style={{ borderRadius: "10px", border: "1.5px dashed rgba(0,0,0,0.18)",
+              padding: "0.6rem 0.9rem", fontSize: "0.68rem", opacity: 0.65, letterSpacing: "0.02em" }}>
+              ＋ attach slides, a PDF, screenshots, or links here
+            </div>
+          )}
+        </div>
+
+        {/* ── right: media panel ── */}
+        {open && hasMedia && (
+          <div style={{ flex: "0 0 48%", minWidth: 0, animation: "pg-pop 0.3s ease",
+            display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+            {media.map((m, k) => (
+              <MediaBlock key={k} m={m} ink={ink} slide={slide} setSlide={setSlide} />
             ))}
-          </ul>
-        </div>
+          </div>
+        )}
       </div>
-
-      {/* attachment control */}
-      {hasMedia ? (
-        <button className="pg-chip" onClick={() => setOpen(o => !o)}
-          style={{ marginTop: "0.8rem", border: "none", cursor: "pointer",
-            background: "rgba(255,255,255,0.2)", color: ink, padding: "7px 14px",
-            borderRadius: "20px", fontSize: "0.72rem", fontFamily: "'Plus Jakarta Sans',sans-serif",
-            letterSpacing: "0.02em" }}>
-          {open ? "▾ hide" : toggleLabel(media)}
-        </button>
-      ) : (
-        <div style={{ marginTop: "0.8rem", borderRadius: "10px",
-          border: "1.5px dashed rgba(0,0,0,0.18)", padding: "0.6rem 0.9rem",
-          fontSize: "0.68rem", opacity: 0.65, letterSpacing: "0.02em" }}>
-          ＋ attach slides, a PDF, screenshots, or links here
-        </div>
-      )}
-
-      {/* expandable attachment panel */}
-      {open && hasMedia && (
-        <div style={{ marginTop: "0.8rem", animation: "pg-pop 0.35s ease" }}>
-          {media.map((m, k) => (
-            <MediaBlock key={k} m={m} ink={ink} slide={slide} setSlide={setSlide} />
-          ))}
-        </div>
-      )}
     </div>
   );
 }
@@ -101,7 +108,7 @@ function MediaBlock({ m, ink, slide, setSlide }: {
 }) {
   if (m.type === "embed") {
     return (
-      <div style={{ width: "100%", height: "clamp(200px,32vh,320px)", marginBottom: "0.7rem" }}>
+      <div style={{ width: "100%", flex: 1, minHeight: "clamp(180px,28vh,260px)" }}>
         <Suspense fallback={
           <div style={{ width: "100%", height: "100%", borderRadius: "10px",
             background: "rgba(255,255,255,0.12)", display: "flex", alignItems: "center",
