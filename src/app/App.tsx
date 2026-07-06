@@ -1,6 +1,6 @@
-import { useRef, useLayoutEffect, useState, useEffect, lazy, Suspense } from "react";
+import { useRef, useLayoutEffect, useState, useEffect } from "react";
 import { useScroll } from "motion/react";
-const VibeGraphEmbed = lazy(() => import("./components/VibeGraphEmbed"));
+import PortfolioItems from "./components/PortfolioItems";
 
 const SECTIONS = [
   { id: "work",     title: "experience", color: "#f56483ff" },
@@ -10,32 +10,147 @@ const SECTIONS = [
   { id: "hobbies",  title: "hobbies",    color: "#31bab2ff" },
 ];
 
-const SECTION_CONTENT = [
-  { bullets: [
-      "Agent Vista · agentic AI + LLMs · 2026–present",
-      "NASA Earth Sciences · wildfire ML research · Summer 2024",
-      "Bungii · delivery analytics · 2025  ·  Kiewit · financial data · 2023",
-    ], visual: "timeline" },
-  { bullets: [
-      "Spotify Vibe Graph · knowledge graph + UMAP · 2025",
-      "ClerkFlow · civic SaaS for local government · 2025–present",
-      "NASA wildfire risk app · Flutter + YOLOv8 + TFLite · 2024",
-    ], visual: "screenshots" },
-  { bullets: [
-      "MIT · BS CS (AI & Decision Making) + Physics · Class of 2029",
-      "U.S. Presidential Scholar  ·  National Merit Scholar  ·  ACT 36/36",
-      "MIT Lincoln Lab LLRISE · NASA AGU Conference '24 · Disney Dreamer",
-    ], visual: "skills map" },
-  { bullets: [
-      "FIFA + MIT Sports Lab · referee last-touch ML model · 2025–present",
-      "MIT Urban Risk Lab · geospatial AI + Google Earth Engine · Fall 2025",
-      "Heartland STEM 501c3 President · Million Girls Moonshot Mentor · FTC Captain",
-    ], visual: "impact map" },
-  { bullets: [
-      "basketball",
-      "singing",
-      "rollercoasters · obviously",
-    ], visual: "photos" },
+// Each section is a list of items. Every item keeps a visible bullet-point
+// description (from Leena's resume) AND an optional list of attachments
+// (`media`) — slide decks, PDFs, links, papers, images, or the live graph.
+// Attachments open in the interactive detail view. Empty `media` renders an
+// "attach slides / links" affordance so Leena can drop files in later.
+// `todo: true` marks bullets that still need her real details.
+//
+// To attach a deck later: export it to numbered PNGs under
+//   public/media/<slug>/1.png, 2.png, …
+// then add  { type: "slides", images: ["/media/<slug>/1.png", …] }  to media.
+export type Media =
+  | { type: "slides"; label?: string; images: string[] }
+  | { type: "link";   label: string; url: string }
+  | { type: "paper";  label: string; url: string }
+  | { type: "image";  src: string; caption?: string }
+  | { type: "embed";  kind: "vibegraph" };
+
+export type Item = {
+  title: string;
+  meta?: string;      // date · place
+  bullets: string[];  // visible description
+  art: string;        // ItemVisual art id
+  todo?: boolean;     // bullets are placeholders to complete
+  media?: Media[];    // attachments (slides, links, papers, …)
+};
+
+export const SECTION_CONTENT: { items: Item[] }[] = [
+  // ── experience ────────────────────────────────────────────────────
+  { items: [
+      { title: "Agent Vista", meta: "Software Engineer Intern · Jan 2026 – present · Cambridge, MA", art: "flow",
+        bullets: [
+          "Building agentic AI workflows that automate insurance lead generation with LLMs and web scraping",
+          "Designed PostgreSQL schemas and Python vector-search pipelines for industry-code identification",
+          "Integrated structured data pipelines with REST APIs for automated business-data enrichment",
+        ] },
+      { title: "NASA · Earth Sciences Division", meta: "Climate Data Research Intern · May – Aug 2024 · Remote", art: "wildfire",
+        bullets: [
+          "Built a real-time wildfire-risk app in Flutter with TensorFlow Lite and a YOLOv8 model",
+          "Co-authored “Integrating Machine Learning and Citizen Science in CS-FLARE”",
+          "Presented findings at the American Geophysical Union 2024 National Conference",
+        ] },
+      { title: "Bungii", meta: "FP&A / Data Analysis Intern · May – June 2025 · Overland Park, KS", art: "route",
+        bullets: [
+          "Led an AI project on dynamic driver pay to maximize margins",
+          "Optimized delivery routes for 10+ clients across 15+ markets",
+          "Ran market research to expand into the box-truck market",
+        ] },
+      { title: "Kiewit Engineering", meta: "Financial Data Analysis Intern · June – July 2023 · Lenexa, KS", art: "grid",
+        bullets: [
+          "Wrote custom Python scripts to update cost reports",
+          "Organized a company-wide billing spreadsheet spanning 500+ projects",
+        ] },
+    ] },
+
+  // ── projects ──────────────────────────────────────────────────────
+  { items: [
+      { title: "Spotify Vibe Graph", meta: "Knowledge graph + UMAP · 2025", art: "vibegraph",
+        bullets: [
+          "A knowledge graph of my listening history",
+          "Every track embedded and UMAP-positioned into mood clusters",
+          "Colored by community — fully explorable",
+        ],
+        media: [{ type: "embed", kind: "vibegraph" }] },
+      { title: "ClerkFlow", meta: "Civic SaaS · 2025 – present", art: "civic", todo: true,
+        bullets: [
+          "Civic SaaS for local government",
+          "Add what it does, who it serves, your role, and the stack",
+        ] },
+      { title: "NASA Wildfire Risk App", meta: "Flutter · YOLOv8 · TFLite · 2024", art: "phoneapp",
+        bullets: [
+          "Cross-platform mobile app surfacing real-time wildfire risk",
+          "On-device YOLOv8 model running through TensorFlow Lite",
+        ] },
+    ] },
+
+  // ── school ────────────────────────────────────────────────────────
+  { items: [
+      { title: "Massachusetts Institute of Technology", meta: "BS CS (AI & Decision Making) + Physics · Class of 2029", art: "dome",
+        bullets: [
+          "Coursework: programming, linear algebra, AI & urban mobility, communicating with data",
+          "Momentum Blue Origin design team · AppDev · SWE · Women in EECS · Ohms Acapella",
+        ] },
+      { title: "Blue Valley West High School", meta: "Class of 2025 · Kansas", art: "aps",
+        bullets: [
+          "Top 1% of Kansas high-school seniors",
+          "4.86 GPA · perfect 36/36 ACT",
+          "5s on all 11 AP exams",
+        ] },
+      { title: "Awards & Honors", art: "medal",
+        bullets: [
+          "U.S. Presidential Scholar · National Merit Scholar",
+          "Letter of Commendation from Kamala Harris",
+          "FIRST Robotics Dean’s List Intl Finalist · Disney Dreamer · NYSC delegate",
+        ] },
+      { title: "MIT Lincoln Laboratory · LLRISE", meta: "Technology Student Researcher · July 2024 · Lexington, MA", art: "radar",
+        bullets: [
+          "1 of 26 students selected for the residential LLRISE program",
+          "Designed and built a radar system from scratch (Doppler + Synthetic Aperture)",
+          "Presented the experiments to 150+ professionals",
+        ] },
+    ] },
+
+  // ── service ───────────────────────────────────────────────────────
+  { items: [
+      { title: "FIFA + MIT Sports Lab", meta: "ML & Data Analysis · Sept 2025 – present", art: "soccer",
+        bullets: [
+          "Developing an ML model that predicts last-touch events from FIFA’s optical tracking",
+          "Supports referee decision-making",
+          "Built annotated datasets of player positions and ball trajectories",
+        ] },
+      { title: "MIT Urban Risk Lab", meta: "Remote Sensing & Geospatial · Sept – Dec 2025", art: "geo",
+        bullets: [
+          "Used Google Earth Engine and DeepMind AlphaEarth embeddings to detect land-use and climate stressors",
+          "Built spatial models and maps for local resilience planning and restoration targeting",
+        ] },
+      { title: "Heartland STEM · 501(c)(3) President", art: "mentor", todo: true,
+        bullets: [
+          "Founded and lead a STEM nonprofit expanding hands-on science access",
+          "Add scope — students reached, programs run, and a highlight",
+        ] },
+      { title: "Million Girls Moonshot Mentor", art: "rocket", todo: true,
+        bullets: [
+          "Mentor for the White House’s Million Girls Moonshot initiative",
+          "Add a detail or two about what you do",
+        ] },
+      { title: "FTC Robotics · Team Captain", art: "robot", todo: true,
+        bullets: [
+          "Captained a FIRST Tech Challenge robotics team",
+          "Add the team name/number and a highlight — an award or season result",
+        ] },
+    ] },
+
+  // ── hobbies ───────────────────────────────────────────────────────
+  { items: [
+      { title: "basketball", art: "basketball", todo: true,
+        bullets: ["Add a line — where you play, favorite team, pickup vs. league"] },
+      { title: "singing", art: "music", todo: true,
+        bullets: ["Add a line — Ohms Acapella at MIT? solo? your go-to song"] },
+      { title: "rollercoasters · obviously", art: "coaster", todo: true,
+        bullets: ["The thread running through this whole site", "Add favorites — top coaster, dream park, biggest drop"] },
+    ] },
 ];
 
 const VW = 1000;
@@ -386,7 +501,12 @@ export default function App() {
 
       {/* Skip to portfolio — fixed pill, appears after a little scroll, hides once portfolio is live */}
       <button
-        onClick={() => p3Ref.current?.scrollIntoView({ behavior: "smooth" })}
+        onClick={() => {
+          const el = p3Ref.current;
+          if (!el) return;
+          // Columns become visible at p3 ≈ 0.875 — scroll to 96% through Phase 3
+          window.scrollTo({ top: el.offsetTop + el.offsetHeight * 0.96, behavior: "smooth" });
+        }}
         style={{
           position: "fixed", bottom: "1.5rem", left: "50%",
           transform: "translateX(-50%)",
@@ -568,51 +688,25 @@ export default function App() {
                     {s.title}
                   </span>
 
-                  {/* Expanded content */}
+                  {/* Expanded content — header + scrollable stack of item cards */}
                   <div style={{
                     position: "absolute", inset: 0,
-                    padding: "clamp(1.5rem,3vw,2.5rem)",
+                    padding: "clamp(1.25rem,2.6vw,2.25rem)",
                     opacity: isActive ? 1 : 0,
                     transition: "opacity 0.25s ease 0.12s",
                     pointerEvents: isActive ? "auto" : "none",
-                    display: "flex", flexDirection: "column", gap: "1.25rem",
-                    color: labelColor(s.color), overflow: "hidden",
+                    display: "flex", flexDirection: "column", gap: "1rem",
+                    color: labelColor(s.color), minHeight: 0,
                   }}>
                     <div style={{
                       fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 600,
-                      fontSize: "clamp(1.2rem,2.5vw,1.9rem)", letterSpacing: "-0.02em", lineHeight: 1.05,
+                      fontSize: "clamp(1.2rem,2.5vw,1.9rem)", letterSpacing: "-0.02em",
+                      lineHeight: 1.05, flexShrink: 0,
                     }}>
                       {s.title}
                     </div>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem", flex: 1, minHeight: 0 }}>
-                      <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", justifyContent: "center", gap: "0.5rem" }}>
-                        {SECTION_CONTENT[i].bullets.map((b, j) => (
-                          <li key={j} style={{ fontSize: "clamp(0.75rem,1.5vw,0.88rem)", paddingLeft: "0.85rem", position: "relative", opacity: 0.9 }}>
-                            <span style={{ position: "absolute", left: 0, opacity: 0.55 }}>·</span>
-                            {b}
-                          </li>
-                        ))}
-                      </ul>
-                      {i === 1 ? (
-                        <Suspense fallback={
-                          <div style={{ borderRadius:"8px", background:"rgba(255,255,255,0.12)",
-                            display:"flex", alignItems:"center", justifyContent:"center",
-                            fontSize:"0.65rem", letterSpacing:"0.1em", textTransform:"uppercase", opacity:0.45 }}>
-                            loading graph…
-                          </div>
-                        }>
-                          <VibeGraphEmbed />
-                        </Suspense>
-                      ) : (
-                        <div style={{
-                          borderRadius: "8px", background: "rgba(255,255,255,0.12)",
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          fontSize: "0.65rem", letterSpacing: "0.1em", textTransform: "uppercase", opacity: 0.55,
-                        }}>
-                          {SECTION_CONTENT[i].visual}
-                        </div>
-                      )}
-                    </div>
+
+                    <PortfolioItems items={SECTION_CONTENT[i].items} ink={labelColor(s.color)} />
                   </div>
                 </div>
               );
