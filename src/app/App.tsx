@@ -429,6 +429,78 @@ const easeC = (t: number) => { const c = Math.max(0, Math.min(1, t)); return c *
 
 /** Little narrator text that fades in at `at` (and optionally out at `fadeOut`)
  *  as the phase's scroll progress `p` advances. Position in % of the screen. */
+function DrawCanvas() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const drawingRef = useRef(false);
+  const lastPosRef = useRef<{ x: number; y: number } | null>(null);
+  const rafRef = useRef<number>(0);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+    resize();
+    window.addEventListener("resize", resize);
+
+    const ctx = canvas.getContext("2d")!;
+    let lastDrawTime = 0;
+
+    // Fade drawn content; hard-clear after 1.5s of no drawing to eliminate ghost traces
+    const fade = () => {
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.fillStyle = "rgba(0,0,0,0.08)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.globalCompositeOperation = "source-over";
+      if (lastDrawTime > 0 && performance.now() - lastDrawTime > 1500) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        lastDrawTime = 0;
+      }
+      rafRef.current = requestAnimationFrame(fade);
+    };
+    rafRef.current = requestAnimationFrame(fade);
+
+    const onDown = (e: MouseEvent) => {
+      drawingRef.current = true;
+      lastPosRef.current = { x: e.clientX, y: e.clientY };
+    };
+    const onMove = (e: MouseEvent) => {
+      if (!drawingRef.current || !lastPosRef.current) return;
+      lastDrawTime = performance.now();
+      ctx.globalCompositeOperation = "source-over";
+      ctx.strokeStyle = "rgba(253,246,236,0.85)";
+      ctx.lineWidth = 2.5;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.beginPath();
+      ctx.moveTo(lastPosRef.current.x, lastPosRef.current.y);
+      ctx.lineTo(e.clientX, e.clientY);
+      ctx.stroke();
+      lastPosRef.current = { x: e.clientX, y: e.clientY };
+    };
+    const onUp = () => { drawingRef.current = false; lastPosRef.current = null; };
+
+    window.addEventListener("mousedown", onDown);
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+      window.removeEventListener("resize", resize);
+      window.removeEventListener("mousedown", onDown);
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+  }, []);
+
+  return (
+    <canvas ref={canvasRef} style={{
+      position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
+      pointerEvents: "none", zIndex: 9998,
+    }} />
+  );
+}
+
 function Cursor() {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -555,6 +627,7 @@ export default function App() {
   return (
     <>
       <Cursor />
+      <DrawCanvas />
       {/* ── Phase 1: name + M1 knot + M2 wave + M3 descent ── */}
       <div ref={p1Ref} className="relative" style={{ height: "500vh" }}>
         <div className="sticky top-0 w-screen h-screen overflow-hidden" style={{ background: "#FDF6EC" }}>

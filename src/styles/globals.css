@@ -1,2 +1,2 @@
-* { scrollbar-width: none; cursor: none !important; }
+* { scrollbar-width: none; cursor: none !important; user-select: none; -webkit-user-select: none; }
 *::-webkit-scrollbar { display: none; }
