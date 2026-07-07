@@ -350,7 +350,7 @@ export default function VibeGraphEmbed() {
     const wrap   = wrapRef.current;
     if (!canvas || !wrap) return;
     const W = wrap.offsetWidth, H = wrap.offsetHeight;
-    if (W < 10 || H < 10) return;
+    if (W < 10 || H < 10) { requestAnimationFrame(redraw); return; }
     const dpr = window.devicePixelRatio ?? 1;
     canvas.width  = W * dpr;
     canvas.height = H * dpr;

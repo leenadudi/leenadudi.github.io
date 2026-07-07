@@ -141,6 +141,8 @@
   background: rgba(255,255,255,0.2) !important;
   border-color: rgba(255,255,255,0.34) !important;
 }
+.pg-project-card { transition: background .25s, transform .18s, border-color .25s; }
+.pg-project-card:hover { background: rgba(255,255,255,0.07) !important; transform: translateY(-2px); }
 .pg-chip { transition: background .2s, transform .2s; }
 .pg-chip:hover { transform: translateY(-1px); }
 .pg-rbtn { transition: background .2s, transform .15s; }

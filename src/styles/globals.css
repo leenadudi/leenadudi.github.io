@@ -1,0 +1,2 @@
+* { scrollbar-width: none; cursor: none !important; }
+*::-webkit-scrollbar { display: none; }

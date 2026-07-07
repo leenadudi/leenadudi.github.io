@@ -1,13 +1,17 @@
 import { useRef, useLayoutEffect, useState, useEffect } from "react";
-import { useScroll } from "motion/react";
+import { useScroll, motion } from "motion/react";
 import PortfolioItems from "./components/PortfolioItems";
+import ExperienceSection from "./components/ExperienceSection";
+import ProjectsSection from "./components/ProjectsSection";
+import SchoolSection from "./components/SchoolSection";
+import HobbiesSection from "./components/HobbiesSection";
 
 const SECTIONS = [
-  { id: "work",     title: "experience", color: "#f56483ff" },
-  { id: "projects", title: "projects",   color: "#fea100ff" },
-  { id: "research", title: "school",     color: "#c66724ff" },
-  { id: "service",  title: "service",    color: "#15484cff" },
-  { id: "hobbies",  title: "hobbies",    color: "#31bab2ff" },
+  { id: "work",     title: "experience", color: "#f56483" },
+  { id: "projects", title: "projects",   color: "#fea100" },
+  { id: "research", title: "school",     color: "#c66724" },
+  { id: "service",  title: "service",    color: "#15484c" },
+  { id: "hobbies",  title: "hobbies",    color: "#31bab2" },
 ];
 
 // Each section is a list of items. Every item keeps a visible bullet-point
@@ -25,120 +29,189 @@ export type Media =
   | { type: "link";   label: string; url: string }
   | { type: "paper";  label: string; url: string }
   | { type: "image";  src: string; caption?: string }
-  | { type: "embed";  kind: "vibegraph" };
+  | { type: "embed";  kind: "vibegraph" }
+  | { type: "iframe"; url: string; label?: string }
+  | { type: "pdf";    url: string; label?: string };
+
+export type Activity = { name: string; role?: string; description?: string };
+export type Award    = { name: string; description?: string };
 
 export type Item = {
   title: string;
   meta?: string;      // date · place
   bullets: string[];  // visible description
   art: string;        // ItemVisual art id
+  skills?: string[];  // tech / skill chips shown under bullets
+  activities?: Activity[]; // for school section clubs list
+  awards?: Award[];        // for school section awards cards
   todo?: boolean;     // bullets are placeholders to complete
   media?: Media[];    // attachments (slides, links, papers, …)
 };
 
 export const SECTION_CONTENT: { items: Item[] }[] = [
-  // ── experience ────────────────────────────────────────────────────
+  // ── experience (reverse-chronological) ───────────────────────────
   { items: [
       { title: "Agent Vista", meta: "Software Engineer Intern · Jan 2026 – present · Cambridge, MA", art: "flow",
         bullets: [
-          "Building agentic AI workflows that automate insurance lead generation with LLMs and web scraping",
-          "Designed PostgreSQL schemas and Python vector-search pipelines for industry-code identification",
-          "Integrated structured data pipelines with REST APIs for automated business-data enrichment",
-        ] },
-      { title: "NASA · Earth Sciences Division", meta: "Climate Data Research Intern · May – Aug 2024 · Remote", art: "wildfire",
-        bullets: [
-          "Built a real-time wildfire-risk app in Flutter with TensorFlow Lite and a YOLOv8 model",
-          "Co-authored “Integrating Machine Learning and Citizen Science in CS-FLARE”",
-          "Presented findings at the American Geophysical Union 2024 National Conference",
-        ] },
+          "Built a document-ingestion and RAG search system: chunks PDFs via the Anthropic Claude Batch API, stores embeddings in PostgreSQL, and serves a query API answering natural-language questions over the documents; deployed on AWS ECS Fargate via Terraform with S3 storage and CodeBuild CI/CD",
+          "Designed a multi-LLM business classification system: given a company name and website, predicts industry codes via pgvector semantic search, fuzzy text matching, and three model providers (Claude, Gemini, OpenAI); added hash-based change detection to cache results and sharply cut repeat API costs",
+          "Built a Playwright-based automated collector for public state business-registry data: robust browser session/state handling with fixture-based CI tests; integrated into Spring Boot services with configurable, region-aware scoring rules",
+          "Built a company scoring and prioritization engine: a configurable multi-factor weighted framework using Claude with live web-search research, automated pre-filtering, resumable batch processing, and a Flask streaming UI with per-factor feedback",
+          "Shipped a PII-masking logging library adopted across Java microservices: per-rule configuration toggles and structured JSON field masking for safe, compliant application logs",
+        ],
+        skills: ["Python", "Java", "Spring Boot", "TypeScript", "Playwright", "PostgreSQL", "pgvector", "LLMs", "AWS ECS", "Terraform", "Docker", "Flask"] },
       { title: "Bungii", meta: "FP&A / Data Analysis Intern · May – June 2025 · Overland Park, KS", art: "route",
         bullets: [
-          "Led an AI project on dynamic driver pay to maximize margins",
-          "Optimized delivery routes for 10+ clients across 15+ markets",
-          "Ran market research to expand into the box-truck market",
-        ] },
+          "Led an AI-driven dynamic driver pay project to improve margin efficiency across 15+ delivery markets",
+          "Optimized last-mile delivery routes for 10+ enterprise clients, reducing operational overhead",
+          "Conducted market research to scope expansion into the box-truck segment",
+        ],
+        skills: ["Python", "SQL", "Excel", "Pandas"] },
+      { title: "NASA · Earth Sciences Division", meta: "Climate Data Research Intern · May – Aug 2024 · Remote", art: "wildfire",
+        bullets: [
+          "Built a cross-platform wildfire-risk app in Flutter, running a YOLOv8 model on-device via TensorFlow Lite for real-time hazard detection",
+          "Co-authored \"Integrating Machine Learning and Citizen Science in CS-FLARE\" — presented at AGU 2024 National Conference",
+          "Processed satellite and citizen-science datasets to surface actionable wildfire risk signals",
+        ],
+        skills: ["Flutter", "Dart", "TensorFlow Lite", "YOLOv8", "Python"],
+        media: [{ type: "pdf", url: "/cs-flare-paper.pdf", label: "CS-FLARE Research Paper" }] },
       { title: "Kiewit Engineering", meta: "Financial Data Analysis Intern · June – July 2023 · Lenexa, KS", art: "grid",
         bullets: [
-          "Wrote custom Python scripts to update cost reports",
-          "Organized a company-wide billing spreadsheet spanning 500+ projects",
-        ] },
+          "Automated cost-report updates with custom Python scripts, eliminating manual data entry across a 500+ project billing ledger",
+          "Consolidated and standardized a company-wide financial tracking spreadsheet spanning multiple divisions",
+        ],
+        skills: ["Python", "Excel", "SQL"] },
     ] },
 
   // ── projects ──────────────────────────────────────────────────────
   { items: [
-      { title: "Spotify Vibe Graph", meta: "Knowledge graph + UMAP · 2025", art: "vibegraph",
+      { title: "leena's music brain", meta: "2025", art: "vibegraph",
         bullets: [
-          "A knowledge graph of my listening history",
-          "Every track embedded and UMAP-positioned into mood clusters",
-          "Colored by community — fully explorable",
+          "Pulled 5 years of Spotify streaming history via the API, enriched each track with Spotify audio features (energy, valence, tempo, danceability), and embedded track metadata with OpenAI text-embedding-3-small",
+          "Built a knowledge graph in NetworkX with weighted edges from co-listening patterns, then ran Louvain community detection to surface 17 natural mood clusters",
+          "Positioned clusters in 2D using UMAP on the full embedding matrix — cluster centroids in energy/valence space give the axes semantic meaning (calm↔hype, dark↔positive)",
+          "Rendered the full 630-node scatter plot on an HTML Canvas with phyllotaxis jitter per cluster, hover hit-detection, and click-to-zoom into a detail view showing within-cluster edges and top artists",
         ],
+        skills: ["Python", "OpenAI", "NetworkX", "UMAP", "React", "TypeScript", "Canvas 2D"],
         media: [{ type: "embed", kind: "vibegraph" }] },
-      { title: "ClerkFlow", meta: "Civic SaaS · 2025 – present", art: "civic", todo: true,
+      { title: "clerkflow", meta: "2025", art: "civic",
         bullets: [
-          "Civic SaaS for local government",
-          "Add what it does, who it serves, your role, and the stack",
-        ] },
-      { title: "NASA Wildfire Risk App", meta: "Flutter · YOLOv8 · TFLite · 2024", art: "phoneapp",
+          "Ingests municipal PDFs (budgets, resolutions, ordinances, minutes) through an agentic profiler: Claude Haiku reads the first N pages to classify document type and extract structured metadata before routing to the pipeline",
+          "Triple-store architecture: Postgres for structured facts, pgvector + Voyage AI embeddings for semantic retrieval, and Neo4j for entity-relationship graphs — all unified behind a single natural-language query interface",
+          "Extensible document type registry — adding a new document type requires only a Pydantic schema definition, zero changes to the ingestion pipeline",
+          "Tesseract OCR + pdf2image fallback for scanned PDFs, with Claude Vision for complex slide-deck layouts; bounded-concurrency async loader for batch ingestion; LLM-judge test harness scoring answer quality against a golden set",
+        ],
+        skills: ["Python", "Flask", "Claude", "pgvector", "Neo4j", "PostgreSQL"],
+        media: [{ type: "iframe", url: "https://council-knowledge-base.vercel.app/" }] },
+      { title: "wyrather", meta: "2025", art: "route",
         bullets: [
-          "Cross-platform mobile app surfacing real-time wildfire risk",
-          "On-device YOLOv8 model running through TensorFlow Lite",
-        ] },
+          "Daily \"would you rather\" polls with real-time head-to-head debates — users vote, see live split counts, then enter a matchmaking queue to argue against someone who voted the opposite way",
+          "All write paths run through Next.js server actions with Zod validation; Postgres Row-Level Security enforces a fully read-only browser client — no direct table access from the frontend",
+          "Atomic PL/pgSQL functions (cast_vote, join_debate, like_comment) eliminate race conditions under concurrent load; debate matchmaking queue uses a 5-second heartbeat ping and 30-second freshness window to filter ghost users",
+          "Anonymous-to-authenticated account upgrade via Supabase identity linking — Google OAuth and magic-link email both preserve all prior anonymous votes and history with zero data loss",
+        ],
+        skills: ["Next.js", "TypeScript", "Supabase", "PostgreSQL", "Row-Level Security"],
+        media: [{ type: "iframe", url: "https://wyrather.me/" }] },
+      { title: "llrise", meta: "Technology Student Researcher · July 2024", art: "radar",
+        bullets: [
+          "1 of 26 students selected nationally for the residential LLRISE (Lincoln Laboratory Radar Introduction for Student Engineers) program",
+          "Built a complete radar system from scratch over 2 weeks: Doppler radar to measure velocity and Synthetic Aperture Radar (SAR) for 2D image reconstruction",
+          "Worked directly with Lincoln Laboratory researchers on RF hardware, signal processing, and live data collection",
+          "Presented final experiments and results to 150+ professionals at MIT Lincoln Laboratory",
+        ],
+        skills: ["Radar Systems", "Signal Processing", "SAR", "RF Hardware", "MATLAB"],
+        media: [{ type: "iframe", url: "https://docs.google.com/presentation/d/1aUz7ceD4-VOW0ucrD849lIC-l9yQFpfIZ0ghPoyEl7Q/embed?start=false&loop=false" }] },
     ] },
 
   // ── school ────────────────────────────────────────────────────────
   { items: [
-      { title: "Massachusetts Institute of Technology", meta: "BS CS (AI & Decision Making) + Physics · Class of 2029", art: "dome",
+      { title: "Massachusetts Institute of Technology", meta: "BS CS · AI & Decision Making + Physics · Class of 2029", art: "dome",
         bullets: [
-          "Coursework: programming, linear algebra, AI & urban mobility, communicating with data",
-          "Momentum Blue Origin design team · AppDev · SWE · Women in EECS · Ohms Acapella",
+          "Intro to Programming & CS",
+          "Fundamentals of Programming",
+          "Physics I & II",
+          "Behavioral Science & Urban Mobility",
+          "Solving Complex Problems",
+          "Linear Algebra",
+          "Communicating with Data",
+        ],
+        activities: [
+          { name: "MIT AppDev", role: "Marketing Chair" },
+          { name: "Women in AI", role: "Resources Lead", description: "Curates AI/ML learning resources, scholarship and grant opportunities for members and the broader community; updates the website with new resources; coordinates intro AI/ML workshops alongside the professional development team" },
+          { name: "Women in EECS" },
+          { name: "Undergraduate Women in Physics" },
+          { name: "Society of Women Engineers" },
+          { name: "Ohms Acapella" },
+        ],
+        awards: [
+          { name: "U.S. Presidential Scholar" },
+          { name: "National Merit Scholar" },
+          { name: "Letter of Commendation from Kamala Harris" },
+          { name: "FIRST Robotics Dean’s List Intl Finalist" },
+          { name: "Disney Dreamer" },
+          { name: "NYSC Delegate" },
         ] },
-      { title: "Blue Valley West High School", meta: "Class of 2025 · Kansas", art: "aps",
+      { title: "momentum x blue origin", meta: "MIT x Blue Origin Design Challenge · 2024-2025", art: "launch",
         bullets: [
-          "Top 1% of Kansas high-school seniors",
-          "4.86 GPA · perfect 36/36 ACT",
-          "5s on all 11 AP exams",
-        ] },
-      { title: "Awards & Honors", art: "medal",
+          "Selected for MIT Momentum, a systems engineering challenge run by Blue Origin engineers — tasked with designing minimum-mass infrastructure to sustain a 5,000-person Mars colony from 2075 to 2125",
+          "Led Communications, Data, and Shelter: designed a 3-layer comms stack (UHF orbital relay, S-band direct-to-Earth, Ka-band high-speed video via 4 HTS satellites) with a per-person bandwidth cap of 3.5 hrs/day",
+          "Designed autonomous positioning using celestial tracking, PNT technology, and pseudolites to replace GPS; added Terrain Relative Navigation for precision landing — no GPS exists on Mars",
+          "Proposed an on-colony data center to eliminate the 20-minute Earth round-trip delay for real-time operational decisions",
+          "Phased shelter plan: Sierra Space LIFE 1400 modules through 2060 transitioning to lava tubes reinforced with MarsCrete; evaluated Hebrus Valles and Arsia Mons as candidate sites",
+        ],
+        skills: ["Systems Engineering", "Mission Design", "Communications Architecture", "Orbital Mechanics", "Structural Analysis"],
+        media: [{ type: "iframe", url: "https://mitprod-my.sharepoint.com/personal/antn_mit_edu/_layouts/15/Doc.aspx?sourcedoc={09676424-2e2c-4b27-a189-5d03883b1858}&action=embedview&wdAr=1.7777777777777777" }] },
+      { title: "distance & delay research", meta: "MIT 11.158 Research Paper · Dec 2025", art: "transit",
         bullets: [
-          "U.S. Presidential Scholar · National Merit Scholar",
-          "Letter of Commendation from Kamala Harris",
-          "FIRST Robotics Dean’s List Intl Finalist · Disney Dreamer · NYSC delegate",
-        ] },
-      { title: "MIT Lincoln Laboratory · LLRISE", meta: "Technology Student Researcher · July 2024 · Lexington, MA", art: "radar",
+          "Designed and ran an original survey of 75 MIT students on commute distance, primary mode, max wait tolerance, and behavioral response to transit delays",
+          "Key finding: longer commutes do not build patience — students adapt by switching to autonomous, schedule-independent modes (biking/scootering) to avoid waiting, rather than developing tolerance for delays",
+          "Transit users showed highest waiting tolerance (mean 15 min) vs. bikers and scooter users (mean 3 min), driven by behavioral habituation to headway-based systems rather than by commute distance",
+          "72-83% of respondents across all distance groups switched modes immediately when faced with an 8-minute delay, showing strong preference for control and predictability over scheduled transit",
+          "Findings suggest campus planners should prioritize reducing uncertainty (real-time arrivals, reliable headways) over raw wait-time reduction to retain low-carbon mode share",
+        ],
+        skills: ["Python", "Pandas", "Matplotlib", "Survey Design", "Statistical Analysis", "Google Forms"],
+        media: [{ type: "pdf", url: "/distance-delay-research.pdf", label: "Research Paper" }] },
+      { title: "FIFA + MIT Sports Lab", meta: "ML & Data Analysis · Sept 2025 – present", art: "soccer",
         bullets: [
-          "1 of 26 students selected for the residential LLRISE program",
-          "Designed and built a radar system from scratch (Doppler + Synthetic Aperture)",
-          "Presented the experiments to 150+ professionals",
-        ] },
+          "Developing an ML model that predicts last-touch events from FIFA’s optical tracking data to support referee decision-making",
+          "Built annotated datasets of player positions and ball trajectories; engineering features from spatial and temporal tracking signals",
+        ],
+        skills: ["Python", "Machine Learning", "Data Annotation", "Computer Vision", "Pandas"] },
+      { title: "MIT Urban Risk Lab", meta: "Remote Sensing & Geospatial · Sept – Dec 2025", art: "geo",
+        bullets: [
+          "Used Google Earth Engine and DeepMind AlphaEarth embeddings to detect land-use change and climate stressors at scale",
+          "Built spatial models and maps for local resilience planning and ecological restoration targeting",
+        ],
+        skills: ["Google Earth Engine", "Python", "Remote Sensing", "Geospatial Analysis"] },
     ] },
 
   // ── service ───────────────────────────────────────────────────────
   { items: [
-      { title: "FIFA + MIT Sports Lab", meta: "ML & Data Analysis · Sept 2025 – present", art: "soccer",
+      { title: "Cambridge Public Schools", meta: "Volunteer", art: "mentor", todo: true,
         bullets: [
-          "Developing an ML model that predicts last-touch events from FIFA’s optical tracking",
-          "Supports referee decision-making",
-          "Built annotated datasets of player positions and ball trajectories",
+          "Volunteer supporting students in the Cambridge public school system",
+          "Add what you do — tutoring, classroom support, subject and grade level",
         ] },
-      { title: "MIT Urban Risk Lab", meta: "Remote Sensing & Geospatial · Sept – Dec 2025", art: "geo",
+      { title: "Million Girls Moonshot", meta: "White House Initiative, Mentor", art: "rocket",
         bullets: [
-          "Used Google Earth Engine and DeepMind AlphaEarth embeddings to detect land-use and climate stressors",
-          "Built spatial models and maps for local resilience planning and restoration targeting",
+          "Selected as a Flight Crew member for the White House’s Million Girls Moonshot — a national initiative to close the gender gap in STEM by connecting girls with hands-on maker and engineering experiences",
+          "Serve as a youth ambassador: represent the initiative at events, share personal STEM journey, and encourage the next generation of women in science and engineering",
         ] },
-      { title: "Heartland STEM · 501(c)(3) President", art: "mentor", todo: true,
+      { title: "Business Professionals of America", meta: "Kansas State Officer", art: "mentor",
         bullets: [
-          "Founded and lead a STEM nonprofit expanding hands-on science access",
-          "Add scope — students reached, programs run, and a highlight",
+          "Elected state officer for Kansas BPA, one of 49,000+ members across 44 states in the nation’s leading career and technical student organization for future business and technology leaders",
+          "Represented Kansas members at national leadership conferences; led professional development sessions and workshops for local chapters statewide",
+          "Organized and oversaw competitive events; collaborated with the state board to set chapter priorities and expand BPA’s reach across Kansas high schools",
         ] },
-      { title: "Million Girls Moonshot Mentor", art: "rocket", todo: true,
+      { title: "inTandem", meta: "Fellow", art: "mentor", todo: true,
         bullets: [
-          "Mentor for the White House’s Million Girls Moonshot initiative",
-          "Add a detail or two about what you do",
+          "Fellow working to help young people develop a sense of purpose and direction",
+          "Add what this looks like in practice — 1:1 mentorship, group sessions, curriculum?",
         ] },
-      { title: "FTC Robotics · Team Captain", art: "robot", todo: true,
+      { title: "Girls Who Code", meta: "Mentor", art: "mentor", todo: true,
         bullets: [
-          "Captained a FIRST Tech Challenge robotics team",
-          "Add the team name/number and a highlight — an award or season result",
+          "Mentor supporting girls learning to code through Girls Who Code",
+          "Add specifics — where, ages/grades, what a session looks like",
         ] },
     ] },
 
@@ -213,13 +286,8 @@ const CONTACT_X = P2_LOOP_X.map(
 const FLOOR_Y = 300; // y where strands land in Phase 3
 
 // Label text color: cream on dark columns, warm-dark on light ones
-function labelColor(hex: string): string {
-  const h = hex.replace("#", "");
-  const r = parseInt(h.slice(0, 2), 16);
-  const g = parseInt(h.slice(2, 4), 16);
-  const b = parseInt(h.slice(4, 6), 16);
-  const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-  return lum < 100 ? "#FDF6EC" : "#3d3427";
+function labelColor(_hex: string): string {
+  return "#FDF6EC";
 }
 
 // ── Path builders ─────────────────────────────────────────────────────────────
@@ -361,6 +429,37 @@ const easeC = (t: number) => { const c = Math.max(0, Math.min(1, t)); return c *
 
 /** Little narrator text that fades in at `at` (and optionally out at `fadeOut`)
  *  as the phase's scroll progress `p` advances. Position in % of the screen. */
+function Cursor() {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const move = (e: MouseEvent) => {
+      el.style.transform = `translate3d(${e.clientX - 5}px, ${e.clientY - 5}px, 0)`;
+    };
+    const hide = () => { el.style.opacity = "0"; };
+    const show = () => { el.style.opacity = "1"; };
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseleave", hide);
+    window.addEventListener("mouseenter", show);
+    return () => {
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("mouseleave", hide);
+      window.removeEventListener("mouseenter", show);
+    };
+  }, []);
+  return (
+    <div ref={ref} style={{
+      position: "fixed", top: 0, left: 0, zIndex: 99999,
+      width: "10px", height: "10px",
+      background: "#FDF6EC",
+      boxShadow: "0 0 0 1px rgba(0,0,0,0.12)",
+      pointerEvents: "none", willChange: "transform",
+      transform: "translate3d(-100px,-100px,0)",
+    }} />
+  );
+}
+
 function Caption({ p, at, fadeOut, x, y, rot = 0, size = "clamp(1.1rem,2.4vw,2rem)", children }: {
   p: number; at: number; fadeOut?: number; x: string; y: string;
   rot?: number; size?: string; children: React.ReactNode;
@@ -428,6 +527,7 @@ export default function App() {
 
   const nameOpacity = Math.max(0, 1 - p1 * 10);
   const [activeSection, setActiveSection] = useState<number | null>(null);
+  const [hoverSection, setHoverSection]   = useState<number | null>(null);
 
   // Scroll nudge — appears 2s after load, fades as soon as user scrolls
   const [nudgeVisible, setNudgeVisible] = useState(false);
@@ -454,6 +554,7 @@ export default function App() {
 
   return (
     <>
+      <Cursor />
       {/* ── Phase 1: name + M1 knot + M2 wave + M3 descent ── */}
       <div ref={p1Ref} className="relative" style={{ height: "500vh" }}>
         <div className="sticky top-0 w-screen h-screen overflow-hidden" style={{ background: "#FDF6EC" }}>
@@ -463,6 +564,15 @@ export default function App() {
               fontSize:"clamp(3rem,10vw,8rem)", color:"#15484cff", letterSpacing:"-0.035em", lineHeight:0.92 }}>
               leena dudi
             </h1>
+            <a href="mailto:ldudi@mit.edu" style={{
+              pointerEvents: "auto",
+              fontFamily: "'Plus Jakarta Sans',sans-serif", fontStyle: "italic",
+              fontSize: "clamp(0.8rem,1.4vw,1rem)", fontWeight: 400,
+              color: "#15484c", opacity: 0.55, marginTop: "0.75rem",
+              textDecoration: "none", letterSpacing: "0.01em",
+            }}>
+              ldudi@mit.edu
+            </a>
           </div>
           <svg viewBox={`0 0 ${VW} ${VH}`} preserveAspectRatio="none"
             className="absolute inset-0 w-full h-full" overflow="hidden">
@@ -498,6 +608,20 @@ export default function App() {
           </div>
         </div>
       </div>
+
+      {/* Fixed email — bottom-right, always visible */}
+      <a href="mailto:ldudi@mit.edu" style={{
+        position: "fixed", bottom: "1.4rem", right: "1.6rem", zIndex: 50,
+        fontFamily: "'Plus Jakarta Sans',sans-serif", fontStyle: "italic",
+        fontSize: "0.75rem", fontWeight: 400, letterSpacing: "0.01em",
+        color: "#15484c", opacity: 0.45, textDecoration: "none",
+        transition: "opacity 0.18s ease",
+      }}
+        onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
+        onMouseLeave={e => (e.currentTarget.style.opacity = "0.45")}
+      >
+        ldudi@mit.edu
+      </a>
 
       {/* Skip to portfolio — fixed pill, appears after a little scroll, hides once portfolio is live */}
       <button
@@ -656,58 +780,106 @@ export default function App() {
           <div className="absolute inset-0 flex"
             style={{ opacity: p3LabelOpacity, pointerEvents: p3LabelOpacity > 0 ? "auto" : "none" }}>
             {SECTIONS.map((s, i) => {
-              const isActive   = activeSection === i;
+              const isActive    = activeSection === i;
               const isCollapsed = activeSection !== null && !isActive;
+              const isHovered   = hoverSection === i && !isActive;
+              const ink         = labelColor(s.color);
               return (
                 <div
                   key={`icol-${s.id}`}
+                  role={isActive ? undefined : "button"}
+                  tabIndex={0}
+                  aria-expanded={isActive}
                   onClick={() => setActiveSection(isActive ? null : i)}
+                  onKeyDown={({ key, preventDefault }: { key: string; preventDefault(): void }) => {
+                    if (key === "Enter" || key === " ") {
+                      preventDefault();
+                      setActiveSection(isActive ? null : i);
+                    }
+                  }}
+                  onMouseEnter={() => setHoverSection(i)}
+                  onMouseLeave={() => setHoverSection(null)}
                   style={{
                     flex: isActive ? 5 : isCollapsed ? 0.28 : 1,
                     background: s.color,
                     overflow: "hidden",
-                    cursor: "pointer",
+                    cursor: isActive ? "default" : "pointer",
                     position: "relative",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    transition: "flex 0.48s cubic-bezier(0.4,0,0.2,1)",
+                    transition: "flex 0.48s cubic-bezier(0.4,0,0.2,1), filter 0.18s ease",
+                    filter: isHovered ? "brightness(1.12)" : "none",
+                    outline: "none",
                   }}
                 >
-                  {/* Label — only visible in default state */}
+                  {/* Label — big when default, rotated when collapsed */}
                   <span style={{
                     fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 500,
-                    fontSize: "clamp(1.1rem,2.5vw,2.1rem)", lineHeight: 1.08,
                     letterSpacing: "-0.01em", textTransform: "lowercase",
-                    color: labelColor(s.color),
+                    color: ink,
                     pointerEvents: "none",
-                    opacity: activeSection === null ? 1 : 0,
-                    transition: "opacity 0.15s ease",
                     position: "relative", zIndex: 1,
+                    whiteSpace: "nowrap",
+                    fontSize: isCollapsed ? "clamp(0.6rem,1.1vw,0.85rem)" : "clamp(1.1rem,2.5vw,2.1rem)",
+                    opacity: isActive ? 0 : 1,
+                    transform: isCollapsed ? "rotate(-90deg)" : "none",
+                    transition: "opacity 0.15s ease, transform 0.35s ease, font-size 0.35s ease",
                   }}>
                     {s.title}
                   </span>
 
-                  {/* Expanded content — header + scrollable stack of item cards */}
-                  <div style={{
-                    position: "absolute", inset: 0,
-                    padding: "clamp(1.25rem,2.6vw,2.25rem)",
-                    opacity: isActive ? 1 : 0,
-                    transition: "opacity 0.25s ease 0.12s",
-                    pointerEvents: isActive ? "auto" : "none",
-                    display: "flex", flexDirection: "column", gap: "1rem",
-                    color: labelColor(s.color), minHeight: 0,
-                  }}>
+                  {/* Expand affordance — visible only in default (not active, not collapsed) state */}
+                  {!isActive && !isCollapsed && (
                     <div style={{
-                      fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 600,
-                      fontSize: "clamp(1.2rem,2.5vw,1.9rem)", letterSpacing: "-0.02em",
-                      lineHeight: 1.05, flexShrink: 0,
+                      position: "absolute", bottom: "1.15rem", left: "50%",
+                      transform: "translateX(-50%)",
+                      pointerEvents: "none",
+                      opacity: isHovered ? 0.85 : 0.4,
+                      transition: "opacity 0.18s ease",
                     }}>
-                      {s.title}
+                      <svg width="16" height="9" viewBox="0 0 16 9" fill="none">
+                        <path d="M1 1L8 8L15 1" stroke={ink} strokeWidth="1.6"
+                          strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
                     </div>
+                  )}
 
-                    <PortfolioItems items={SECTION_CONTENT[i].items} ink={labelColor(s.color)} />
-                  </div>
+                  {/* Expanded content — header + section component */}
+                  <motion.div
+                    style={{
+                      position: "absolute", inset: 0,
+                      padding: "clamp(1.25rem,2.6vw,2.25rem)",
+                      pointerEvents: isActive ? "auto" : "none",
+                      display: "flex", flexDirection: "column", gap: "1rem",
+                      color: ink, minHeight: 0,
+                    }}
+                    animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : 10 }}
+                    transition={{ duration: 0.26, delay: isActive ? 0.14 : 0, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    {i !== 1 && (
+                      <div style={{
+                        fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 600,
+                        fontSize: "clamp(1.2rem,2.5vw,1.9rem)", letterSpacing: "-0.02em",
+                        lineHeight: 1.05, flexShrink: 0,
+                      }}>
+                        {s.title}
+                      </div>
+                    )}
+
+                    {i === 0
+                      ? <ExperienceSection items={SECTION_CONTENT[i].items} ink={ink} />
+                      : i === 1
+                      ? <ProjectsSection items={SECTION_CONTENT[i].items} ink={ink} title={s.title} />
+                      : i === 2
+                      ? <SchoolSection items={SECTION_CONTENT[i].items} ink={ink} />
+                      : i === 3
+                      ? <ExperienceSection items={SECTION_CONTENT[i].items} ink={ink} />
+                      : i === 4
+                      ? <HobbiesSection ink={ink} />
+                      : <PortfolioItems items={SECTION_CONTENT[i].items} ink={ink} />
+                    }
+                  </motion.div>
                 </div>
               );
             })}
