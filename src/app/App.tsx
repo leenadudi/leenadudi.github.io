@@ -682,21 +682,7 @@ export default function App() {
         </div>
       </div>
 
-      {/* Fixed email — bottom-right, always visible */}
-      <a href="mailto:ldudi@mit.edu" style={{
-        position: "fixed", bottom: "1.4rem", right: "1.6rem", zIndex: 50,
-        fontFamily: "'Plus Jakarta Sans',sans-serif", fontStyle: "italic",
-        fontSize: "0.75rem", fontWeight: 400, letterSpacing: "0.01em",
-        color: "#15484c", opacity: 0.45, textDecoration: "none",
-        transition: "opacity 0.18s ease",
-      }}
-        onMouseEnter={e => (e.currentTarget.style.opacity = "0.85")}
-        onMouseLeave={e => (e.currentTarget.style.opacity = "0.45")}
-      >
-        ldudi@mit.edu
-      </a>
-
-      {/* Skip to portfolio — fixed pill, appears after a little scroll, hides once portfolio is live */}
+{/* Skip to portfolio — fixed pill, appears after a little scroll, hides once portfolio is live */}
       <button
         onClick={() => {
           const el = p3Ref.current;

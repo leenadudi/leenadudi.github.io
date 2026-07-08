@@ -19,16 +19,21 @@ const TRAVEL_PINS: { name: string; lat: number; lon: number }[] = [
 ];
 
 const READING: { title: string; author: string }[] = [
-  { title: "Add title", author: "Author" },
-  { title: "Add title", author: "Author" },
+  { title: "Think: A Compelling Introduction to Philosophy", author: "Simon Blackburn" },
+  { title: "Man's Search for Meaning", author: "Viktor E. Frankl" },
 ];
 
-const ALBUMS: { title: string; artist: string }[] = [
-  { title: "Add album", artist: "Artist" },
-  { title: "Add album", artist: "Artist" },
-  { title: "Add album", artist: "Artist" },
-  { title: "Add album", artist: "Artist" },
-  { title: "Add album", artist: "Artist" },
+const ALBUMS: { title: string; artist: string; cover?: string }[] = [
+  { title: "Snow Angel",                     artist: "Reneé Rapp",    cover: "https://cdn-images.dzcdn.net/images/cover/e2728454168a221597bd74042eb4bea9/250x250-000000-80-0-0.jpg" },
+  { title: "Hit Me Hard and Soft",           artist: "Billie Eilish", cover: "https://cdn-images.dzcdn.net/images/cover/5d284b31cb9ddeb1a0c79aede5a94e1c/250x250-000000-80-0-0.jpg" },
+  { title: "The Miseducation of Lauryn Hill", artist: "Lauryn Hill",  cover: "https://cdn-images.dzcdn.net/images/cover/79ea9d5f45c41d82e511c59f0bd8fc5a/250x250-000000-80-0-0.jpg" },
+  { title: "Kansas Anymore",                 artist: "Role Model",    cover: "https://cdn-images.dzcdn.net/images/cover/403c5bd6d747aa6f2095e3c52fdff503/250x250-000000-80-0-0.jpg" },
+  { title: "Submarine",                      artist: "The Marías",    cover: "https://cdn-images.dzcdn.net/images/cover/574bd156ad04b9af443cdf6775cfa8c3/250x250-000000-80-0-0.jpg" },
+  { title: "Messy",                          artist: "Olivia Dean",   cover: "https://cdn-images.dzcdn.net/images/cover/0f3f905b35a640121180f26a422dcfd7/250x250-000000-80-0-0.jpg" },
+  { title: "For Crying Out Loud",            artist: "FINNEAS",       cover: "https://cdn-images.dzcdn.net/images/cover/2a0dec681e38e01a35b9bb4c2c889540/250x250-000000-80-0-0.jpg" },
+  { title: "Never Enough",                   artist: "Daniel Caesar", cover: "https://cdn-images.dzcdn.net/images/cover/0d571082af7c78114321031d7f84d331/250x250-000000-80-0-0.jpg" },
+  { title: "The Great Divide",               artist: "Noah Kahan",    cover: "https://cdn-images.dzcdn.net/images/cover/a0b05276a5231399968dffaa1a6b4cf0/250x250-000000-80-0-0.jpg" },
+  { title: "Hollywood's Bleeding",           artist: "Post Malone",   cover: "https://cdn-images.dzcdn.net/images/cover/4642b8e3e0a89f92a6e2bfed13d8f31c/250x250-000000-80-0-0.jpg" },
 ];
 
 // ── Globe ─────────────────────────────────────────────────────────────────────
@@ -250,7 +255,7 @@ export default function HobbiesSection({ ink }: { ink: string }) {
             <ColLabel ink={ink}>currently reading</ColLabel>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.7rem" }}>
               {READING.map((book, i) => (
-                <div key={i} style={{ opacity: 0.4 }}>
+                <div key={i}>
                   <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 600, fontStyle: "italic", fontSize: "clamp(0.84rem,1.45vw,0.96rem)", color: ink, lineHeight: 1.3 }}>
                     {book.title}
                   </div>
@@ -263,20 +268,23 @@ export default function HobbiesSection({ ink }: { ink: string }) {
           </div>
 
           <div>
-            <ColLabel ink={ink}>top 5 albums</ColLabel>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.55rem" }}>
+            <ColLabel ink={ink}>favorite albums</ColLabel>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem" }}>
               {ALBUMS.map((album, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "baseline", gap: "0.6rem", opacity: 0.4 }}>
-                  <span style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 800, fontSize: "0.65rem", color: ink, opacity: 0.45, minWidth: "0.9rem" }}>
-                    {i + 1}
-                  </span>
-                  <div>
-                    <span style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 600, fontStyle: "italic", fontSize: "clamp(0.82rem,1.4vw,0.94rem)", color: ink }}>
+                <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.55rem" }}>
+                  {album.cover ? (
+                    <img src={album.cover} alt={album.title}
+                      style={{ width: "32px", height: "32px", borderRadius: "4px", objectFit: "cover", flexShrink: 0, opacity: 0.92 }} />
+                  ) : (
+                    <div style={{ width: "32px", height: "32px", borderRadius: "4px", flexShrink: 0, background: rgba(ink, 0.15) }} />
+                  )}
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 600, fontStyle: "italic", fontSize: "clamp(0.78rem,1.35vw,0.9rem)", color: ink, lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {album.title}
-                    </span>
-                    <span style={{ fontSize: "clamp(0.72rem,1.2vw,0.82rem)", color: ink, marginLeft: "0.4rem" }}>
+                    </div>
+                    <div style={{ fontSize: "clamp(0.68rem,1.1vw,0.76rem)", color: ink, opacity: 0.65, lineHeight: 1.2 }}>
                       {album.artist}
-                    </span>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -296,7 +304,7 @@ function ColLabel({ ink, children }: { ink: string; children: string }) {
     <div style={{
       fontSize: "0.65rem", fontFamily: "'Plus Jakarta Sans',sans-serif",
       fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase",
-      color: ink, opacity: 0.55, marginBottom: "0.6rem",
+      color: ink, opacity: 0.9, marginBottom: "0.6rem",
     }}>
       {children}
     </div>
