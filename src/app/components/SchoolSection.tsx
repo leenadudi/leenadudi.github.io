@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "motion/react";
-import type { Item } from "../App";
+import { type Item, labelColor } from "../App";
 
 export default function SchoolSection({ items, ink }: { items: Item[]; ink: string }) {
   const mit      = items[0];
@@ -98,7 +98,7 @@ export default function SchoolSection({ items, ink }: { items: Item[]; ink: stri
                 letterSpacing: "-0.01em",
                 position: "relative",
                 background: "transparent",
-                color: i === activeR ? "#3d2a0e" : ink,
+                color: i === activeR ? labelColor(ink) : ink,
                 border: `2px solid ${i === activeR ? ink : rgba(ink, 0.65)}`,
                 opacity: i === activeR ? 1 : 0.88,
                 transition: "color .2s, border-color .2s, opacity .2s",

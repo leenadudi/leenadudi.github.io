@@ -7,11 +7,11 @@ import SchoolSection from "./components/SchoolSection";
 import HobbiesSection from "./components/HobbiesSection";
 
 const SECTIONS = [
-  { id: "work",     title: "experience", color: "#f56483" },
-  { id: "projects", title: "projects",   color: "#fea100" },
-  { id: "research", title: "school",     color: "#c66724" },
-  { id: "service",  title: "service",    color: "#15484c" },
-  { id: "hobbies",  title: "hobbies",    color: "#31bab2" },
+  { id: "work",     title: "experience", color: "#34C8C5" },
+  { id: "projects", title: "projects",   color: "#DF84BD" },
+  { id: "research", title: "school",     color: "#FC8A8E" },
+  { id: "service",  title: "service",    color: "#FFAE69" },
+  { id: "hobbies",  title: "hobbies",    color: "#FEE09D" },
 ];
 
 // Each section is a list of items. Every item keeps a visible bullet-point
@@ -294,8 +294,24 @@ const CONTACT_X = P2_LOOP_X.map(
 const FLOOR_Y = 300; // y where strands land in Phase 3
 
 // Label text color: cream on dark columns, warm-dark on light ones
-function labelColor(_hex: string): string {
-  return "#FDF6EC";
+// Pick the higher-contrast ink for a given background — cream on dark sections,
+// dark teal on light ones (e.g. the orange projects panel) — via WCAG contrast.
+const CREAM = "#FDF6EC";
+const DARK_INK = "#000000";
+function relLuminance(hex: string): number {
+  const c = hex.replace("#", "").slice(0, 6);
+  const lin = [0, 2, 4].map((i) => {
+    const v = parseInt(c.slice(i, i + 2), 16) / 255;
+    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2];
+}
+function contrast(a: string, b: string): number {
+  const [hi, lo] = [relLuminance(a), relLuminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+}
+export function labelColor(hex: string): string {
+  return contrast(hex, DARK_INK) >= contrast(hex, CREAM) ? DARK_INK : CREAM;
 }
 
 // ── Path builders ─────────────────────────────────────────────────────────────
@@ -552,7 +568,7 @@ function Caption({ p, at, fadeOut, x, y, rot = 0, size = "clamp(1.1rem,2.4vw,2re
       transform: `translateY(${(1 - on) * 16}px) rotate(${rot}deg)`,
       transformOrigin: "left top",
       fontFamily: "'Poppins',sans-serif", fontStyle: "italic", fontWeight: 400,
-      fontSize: size, color: "#15484c", letterSpacing: "-0.01em", whiteSpace: "nowrap",
+      fontSize: size, color: "#000000", letterSpacing: "-0.01em", whiteSpace: "nowrap",
     }}>{children}</div>
   );
 }
@@ -642,14 +658,14 @@ export default function App() {
           <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none"
             style={{ opacity: nameOpacity }}>
             <h1 style={{ fontFamily:"'Poppins',sans-serif", fontStyle:"italic", fontWeight:200,
-              fontSize:"clamp(3rem,10vw,8rem)", color:"#15484cff", letterSpacing:"-0.035em", lineHeight:0.92 }}>
+              fontSize:"clamp(3rem,10vw,8rem)", color:"#000000ff", letterSpacing:"-0.035em", lineHeight:0.92 }}>
               leena dudi
             </h1>
             <a href="mailto:ldudi@mit.edu" style={{
               pointerEvents: "auto",
               fontFamily: "'Plus Jakarta Sans',sans-serif", fontStyle: "italic",
               fontSize: "clamp(0.8rem,1.4vw,1rem)", fontWeight: 400,
-              color: "#15484c", opacity: 0.55, marginTop: "0.75rem",
+              color: "#000000", opacity: 0.55, marginTop: "0.75rem",
               textDecoration: "none", letterSpacing: "0.01em",
             }}>
               ldudi@mit.edu
@@ -670,19 +686,19 @@ export default function App() {
           <Caption p={p1} at={0.7} x="95%" y="6%"  rot={58} size="clamp(1.2rem,2.4vw,2rem)">weeeee</Caption>
           <div className="absolute bottom-0 left-0 h-px z-40" style={{
             width:`${p1*100}%`,
-            background:"linear-gradient(90deg,#F04878,#F09820,#A85C2A,#2D9B68,#2898A8)",
+            background:"linear-gradient(90deg,#34C8C5,#DF84BD,#FC8A8E,#FFAE69,#FEE09D)",
             opacity:Math.min(1,p1*6) }} />
 
           {/* Scroll nudge - fades in after 2s, vanishes as soon as scrolling starts */}
           <div className="absolute bottom-10 left-1/2 z-30 pointer-events-none flex flex-col items-center gap-2"
             style={{ transform: "translateX(-50%)", opacity: scrollHintOpacity, transition: "opacity 0.5s ease" }}>
             <span style={{ fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:"0.65rem",
-              letterSpacing:"0.18em", textTransform:"uppercase", color:"#15484c", opacity:0.45 }}>
+              letterSpacing:"0.18em", textTransform:"uppercase", color:"#000000", opacity:0.45 }}>
               scroll
             </span>
             <div style={{ animation: "scroll-nudge-bounce 1.8s ease-in-out infinite" }}>
               <svg width="22" height="14" viewBox="0 0 22 14" fill="none">
-                <path d="M2 2L11 11L20 2" stroke="#15484c" strokeOpacity="0.4" strokeWidth="2"
+                <path d="M2 2L11 11L20 2" stroke="#000000" strokeOpacity="0.4" strokeWidth="2"
                   strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>

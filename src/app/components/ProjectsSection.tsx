@@ -1,6 +1,6 @@
 import { lazy, Suspense, useState } from "react";
 import { motion } from "motion/react";
-import type { Item } from "../App";
+import { type Item, labelColor } from "../App";
 
 const VibeGraphEmbed = lazy(() => import("./VibeGraphEmbed"));
 
@@ -31,7 +31,7 @@ export default function ProjectsSection({ items, ink, title }: { items: Item[]; 
             letterSpacing: "-0.01em",
             position: "relative",
             background: "transparent",
-            color: i === active ? "#3d2a0e" : ink,
+            color: i === active ? labelColor(ink) : ink,
             border: `2px solid ${i === active ? ink : rgba(ink, 0.65)}`,
             opacity: i === active ? 1 : 0.88,
             transition: "color .2s, border-color .2s, opacity .2s",
