@@ -1,10 +1,10 @@
 /**
- * PortfolioItems — the item list inside an expanded column.
+ * PortfolioItems - the item list inside an expanded column.
  *
  * Each item is a card that always shows its visual + title + bullet-point
  * description.  If the item has attachments (slide deck, links, papers,
  * images, or the live Vibe Graph), a toggle expands them inline beneath the
- * bullets — so the text is always readable and the extras open on click.
+ * bullets - so the text is always readable and the extras open on click.
  * Items with nothing attached yet show a dashed "attach …" cue.
  */
 import { useState, lazy, Suspense } from "react";
@@ -85,7 +85,7 @@ function Card({ item, ink }: { item: Item; ink: string }) {
         </div>
       )}
 
-      {/* media panel — below the text */}
+      {/* media panel - below the text */}
       {open && hasMedia && (
         <div style={{ marginTop: "0.8rem", animation: "pg-pop 0.3s ease" }}>
           {media.map((m, k) => (

@@ -7,11 +7,11 @@ import type { Topology } from "topojson-specification";
 
 const BASKETBALL_ESSAY = [
   "As I slip my feet into my shoes, I grab the red and blue striped basketball and place it comfortably in my left arm. I stretch my hamstrings, do a couple of lunges, and dribble up and down my driveway to get ready for my performance. I click \"play\" on my Spotify favorite and, as the first beat drops, take my first jumpshot. The coordination of the swish and the beat of my music encourages me to continue.",
-  "Every day my show is different, consisting of a different mix of moves — layups, threes, and crossovers — all based on the music playing in my ear.",
-  "Although my knee has restricted me from playing competitively, I have not given up the delight I get from basketball. I've come to think of it as the one place where I can express every part of myself — not to be seen, just to be felt.",
+  "Every day my show is different, consisting of a different mix of moves (layups, threes, and crossovers) all based on the music playing in my ear.",
+  "Although my knee has restricted me from playing competitively, I have not given up the delight I get from basketball. I've come to think of it as the one place where I can express every part of myself, not to be seen, just to be felt.",
 ];
 
-// Placeholder pins — swap [lat, lon] for real destinations
+// Placeholder pins - swap [lat, lon] for real destinations
 const TRAVEL_PINS: { name: string; lat: number; lon: number }[] = [
   { name: "add a place →", lat: 40.7, lon: -74.0 },
   { name: "add a place →", lat: 51.5, lon: -0.1 },
@@ -46,7 +46,7 @@ function Globe({ ink }: { ink: string }) {
   const dragRef   = useRef<{ x: number; y: number; rot: [number, number] } | null>(null);
   const rafRef    = useRef<number>(0);
 
-  // Always-fresh paint function stored in a ref — safe to call from ResizeObserver / rAF
+  // Always-fresh paint function stored in a ref - safe to call from ResizeObserver / rAF
   const paintRef = useRef<() => void>(null!);
   paintRef.current = () => {
     const canvas = canvasRef.current;
@@ -55,7 +55,7 @@ function Globe({ ink }: { ink: string }) {
 
     const W = canvas.clientWidth;
     const H = canvas.clientHeight;
-    if (!W || !H) return; // not laid out yet — ResizeObserver will fire again
+    if (!W || !H) return; // not laid out yet - ResizeObserver will fire again
 
     canvas.width  = W * devicePixelRatio;
     canvas.height = H * devicePixelRatio;
@@ -146,7 +146,7 @@ function Globe({ ink }: { ink: string }) {
       });
   }, []);
 
-  // ResizeObserver — redraws whenever canvas gets real dimensions (e.g. during section-open animation)
+  // ResizeObserver - redraws whenever canvas gets real dimensions (e.g. during section-open animation)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -242,7 +242,7 @@ export default function HobbiesSection({ ink }: { ink: string }) {
 
         {/* Globe */}
         <div style={{ flex: 2, display: "flex", flexDirection: "column" }}>
-          <ColLabel ink={ink}>travel — drag to explore</ColLabel>
+          <ColLabel ink={ink}>travel · drag to explore</ColLabel>
           <div style={{ flex: 1, borderRadius: "12px", overflow: "hidden", background: rgba(ink, 0.05), border: `1px solid ${rgba(ink, 0.15)}` }}>
             <Globe ink={ink} />
           </div>

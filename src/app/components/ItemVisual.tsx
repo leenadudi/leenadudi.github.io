@@ -1,5 +1,5 @@
 /**
- * ItemVisual — one small visualization per portfolio item.
+ * ItemVisual - one small visualization per portfolio item.
  *
  * "Mixed per item": most items get a custom line-art SVG themed to the item
  * and drawn in the column's ink colour; items with real numbers get a tiny
@@ -87,7 +87,7 @@ export default function ItemVisual({ art, ink }: Props) {
 
   switch (art) {
     // ── experience ──────────────────────────────────────────────────
-    case "flow": // Agent Vista — agentic AI workflow: nodes + links
+    case "flow": // Agent Vista - agentic AI workflow: nodes + links
       return <Svg ink={ink}>
         <circle cx="20" cy="30" r="9" fill={f} />
         <circle cx="50" cy="62" r="11" fill={soft(ink, 0.28)} />
@@ -97,7 +97,7 @@ export default function ItemVisual({ art, ink }: Props) {
         <circle cx="50" cy="62" r="3" fill={ink} stroke="none" />
       </Svg>;
 
-    case "route": // Bungii — last-mile delivery routes
+    case "route": // Bungii - last-mile delivery routes
       return <Svg ink={ink}>
         <path d="M14 78 C 34 78 30 42 50 42 S 70 20 86 20" strokeDasharray="4 5" />
         <circle cx="14" cy="78" r="4" fill={f} />
@@ -105,13 +105,13 @@ export default function ItemVisual({ art, ink }: Props) {
         <circle cx="86" cy="23" r="3" fill={ink} stroke="none" />
       </Svg>;
 
-    case "wildfire": // NASA — real-time wildfire risk
+    case "wildfire": // NASA - real-time wildfire risk
       return <Svg ink={ink}>
         <path d="M50 20 c 10 14 16 20 16 34 a16 16 0 0 1 -32 0 c 0 -10 6 -14 8 -22 c 4 6 2 12 8 12 c 6 0 -2 -12 0 -24 z" fill={f} />
         <path d="M22 82 h56" opacity={0.5} />
       </Svg>;
 
-    case "grid": // Kiewit — 500+ project billing spreadsheet
+    case "grid": // Kiewit - 500+ project billing spreadsheet
       return <Svg ink={ink}>
         <rect x="16" y="20" width="68" height="60" rx="3" fill={f} />
         <line x1="16" y1="36" x2="84" y2="36" />
@@ -123,7 +123,7 @@ export default function ItemVisual({ art, ink }: Props) {
       </Svg>;
 
     // ── projects ────────────────────────────────────────────────────
-    case "civic": // ClerkFlow — civic SaaS for local government
+    case "civic": // ClerkFlow - civic SaaS for local government
       return <Svg ink={ink}>
         <path d="M18 40 L50 22 L82 40" fill={f} />
         <line x1="18" y1="40" x2="82" y2="40" />
@@ -134,7 +134,7 @@ export default function ItemVisual({ art, ink }: Props) {
         <line x1="14" y1="80" x2="86" y2="80" />
       </Svg>;
 
-    case "phoneapp": // NASA wildfire app — Flutter mockup
+    case "phoneapp": // NASA wildfire app - Flutter mockup
       return <Svg ink={ink}>
         <rect x="34" y="12" width="32" height="76" rx="6" fill={f} />
         <line x1="44" y1="18" x2="56" y2="18" />
@@ -144,7 +144,7 @@ export default function ItemVisual({ art, ink }: Props) {
       </Svg>;
 
     // ── school ──────────────────────────────────────────────────────
-    case "dome": // MIT — great dome
+    case "dome": // MIT - great dome
       return <Svg ink={ink}>
         <path d="M22 66 a28 22 0 0 1 56 0 z" fill={f} />
         <line x1="16" y1="66" x2="84" y2="66" />
@@ -156,7 +156,7 @@ export default function ItemVisual({ art, ink }: Props) {
         <line x1="50" y1="24" x2="50" y2="44" />
       </Svg>;
 
-    case "aps": // Blue Valley West — 11 AP fives (bar chart)
+    case "aps": // Blue Valley West - 11 AP fives (bar chart)
       return <BarChart ink={ink} />;
 
     case "medal": // awards & honors
@@ -167,7 +167,7 @@ export default function ItemVisual({ art, ink }: Props) {
           fill={soft(ink, 0.4)} stroke="none" />
       </Svg>;
 
-    case "radar": // Lincoln Lab — Doppler / SAR radar
+    case "radar": // Lincoln Lab - Doppler / SAR radar
       return <Svg ink={ink}>
         <circle cx="50" cy="72" r="10" fill={f} />
         <path d="M50 72 A34 34 0 0 1 84 72" opacity={0.35} />
@@ -177,7 +177,7 @@ export default function ItemVisual({ art, ink }: Props) {
       </Svg>;
 
     // ── service / research ──────────────────────────────────────────
-    case "soccer": // FIFA + MIT Sports Lab — optical tracking
+    case "soccer": // FIFA + MIT Sports Lab - optical tracking
       return <Svg ink={ink}>
         <rect x="14" y="24" width="72" height="52" rx="3" fill={f} />
         <line x1="50" y1="24" x2="50" y2="76" />
@@ -188,7 +188,7 @@ export default function ItemVisual({ art, ink }: Props) {
         <path d="M34 40 L62 38 M62 38 L66 60" strokeDasharray="3 3" opacity={0.6} />
       </Svg>;
 
-    case "geo": // Urban Risk Lab — geospatial / Earth Engine
+    case "geo": // Urban Risk Lab - geospatial / Earth Engine
       return <Svg ink={ink}>
         <circle cx="50" cy="50" r="30" fill={f} />
         <ellipse cx="50" cy="50" rx="30" ry="12" />
@@ -196,7 +196,7 @@ export default function ItemVisual({ art, ink }: Props) {
         <line x1="20" y1="50" x2="80" y2="50" />
       </Svg>;
 
-    case "mentor": // Heartland STEM 501c3 — mentorship
+    case "mentor": // Heartland STEM 501c3 - mentorship
       return <Svg ink={ink}>
         <circle cx="34" cy="38" r="10" fill={f} />
         <path d="M18 74 c 0 -12 8 -18 16 -18 s 16 6 16 18" fill={f} />
@@ -243,7 +243,7 @@ export default function ItemVisual({ art, ink }: Props) {
         <path d="M47 34 L79 28" />
       </Svg>;
 
-    case "coaster": // rollercoasters — the site's signature motif
+    case "coaster": // rollercoasters - the site's signature motif
       return <Svg ink={ink}>
         <path d="M14 78 C 30 78 24 30 40 30 C 56 30 52 60 66 60 C 78 60 74 34 88 34" />
         <path d="M14 84 L20 78 M28 84 L34 78 M42 84 L48 78 M56 84 L62 78 M70 84 L76 78 M84 84 L90 78" opacity={0.5} />

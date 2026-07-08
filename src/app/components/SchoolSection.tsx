@@ -115,7 +115,7 @@ export default function SchoolSection({ items, ink }: { items: Item[]; ink: stri
             ))}
           </div>
 
-          {/* Active item content — 25/75 split if PDF, full width otherwise */}
+          {/* Active item content - 25/75 split if PDF, full width otherwise */}
           {activeItem && (
             <div style={{ display: "flex", gap: "0.7rem", minHeight: "370px" }}>
               {/* Text pane */}
@@ -154,7 +154,7 @@ export default function SchoolSection({ items, ink }: { items: Item[]; ink: stri
                   </div>
                   <object data={pdfMedia.url} type="application/pdf" style={{ flex: 1, width: "100%", border: "none", display: "block" }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", opacity: 0.5, fontSize: "0.8rem", color: ink }}>
-                      PDF preview unavailable — <a href={pdfMedia.url} target="_blank" rel="noreferrer" style={{ color: ink, marginLeft: "0.3em" }}>open directly</a>
+                      PDF preview unavailable - <a href={pdfMedia.url} target="_blank" rel="noreferrer" style={{ color: ink, marginLeft: "0.3em" }}>open directly</a>
                     </div>
                   </object>
                 </div>
@@ -187,7 +187,7 @@ function ColLabel({ ink, children }: { ink: string; children: string }) {
     <div style={{
       fontSize: "0.65rem", fontFamily: "'Plus Jakarta Sans',sans-serif",
       fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase",
-      color: ink, opacity: 0.55, marginBottom: "0.5rem",
+      color: ink, opacity: 0.9, marginBottom: "0.5rem",
     }}>
       {children}
     </div>

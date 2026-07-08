@@ -72,7 +72,7 @@ function Row({ item, ink, last }: { item: Item; ink: string; last: boolean }) {
             fontSize: "clamp(0.84rem, 1.5vw, 0.96rem)",
             lineHeight: 1.48, color: ink, opacity: 1,
           }}>
-            <span style={{ opacity: 0.38, flexShrink: 0, userSelect: "none" }}>—</span>
+            <span style={{ opacity: 0.38, flexShrink: 0, userSelect: "none" }}>-</span>
             <span>{b}</span>
           </li>
         ))}

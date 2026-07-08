@@ -51,7 +51,7 @@ export default function ProjectsSection({ items, ink, title }: { items: Item[]; 
 
       {/* Content */}
       <div style={{ flex: 1, minHeight: 0, display: "flex", gap: "0.7rem", overflow: "hidden" }}>
-        {/* Text — 25% when visual present, full width otherwise */}
+        {/* Text - 25% when visual present, full width otherwise */}
         <div style={{ width: hasVisual ? "25%" : "100%", flexShrink: 0, overflowY: "auto", display: "flex", flexDirection: "column", justifyContent: hasVisual ? "center" : "flex-start" }}>
           <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.3rem" }}>
             {item.bullets.map((b, j) => (
@@ -69,7 +69,7 @@ export default function ProjectsSection({ items, ink, title }: { items: Item[]; 
           )}
         </div>
 
-        {/* Visual — 75% */}
+        {/* Visual - 75% */}
         {hasEmbed && (
           <div style={{ flex: 1, minWidth: 0, borderRadius: "8px", overflow: "hidden" }}>
             <Suspense fallback={<div style={{ width:"100%",height:"100%",background:rgba(ink,0.08),borderRadius:"8px" }} />}>
@@ -105,7 +105,7 @@ export default function ProjectsSection({ items, ink, title }: { items: Item[]; 
               style={{ flex: 1, width: "100%", border: "none", display: "block" }}
             >
               <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", opacity: 0.4, fontSize: "0.8rem", color: ink }}>
-                PDF preview unavailable —{" "}
+                PDF preview unavailable -{" "}
                 <a href={pdfMedia.url} target="_blank" rel="noreferrer" style={{ color: ink, marginLeft: "0.3em" }}>open directly</a>
               </div>
             </object>

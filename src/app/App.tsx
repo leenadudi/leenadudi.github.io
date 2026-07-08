@@ -16,7 +16,7 @@ const SECTIONS = [
 
 // Each section is a list of items. Every item keeps a visible bullet-point
 // description (from Leena's resume) AND an optional list of attachments
-// (`media`) — slide decks, PDFs, links, papers, images, or the live graph.
+// (`media`) - slide decks, PDFs, links, papers, images, or the live graph.
 // Attachments open in the interactive detail view. Empty `media` renders an
 // "attach slides / links" affordance so Leena can drop files in later.
 // `todo: true` marks bullets that still need her real details.
@@ -70,7 +70,7 @@ export const SECTION_CONTENT: { items: Item[] }[] = [
       { title: "NASA · Earth Sciences Division", meta: "Climate Data Research Intern · May – Aug 2024 · Remote", art: "wildfire",
         bullets: [
           "Built a cross-platform wildfire-risk app in Flutter, running a YOLOv8 model on-device via TensorFlow Lite for real-time hazard detection",
-          "Co-authored \"Integrating Machine Learning and Citizen Science in CS-FLARE\" — presented at AGU 2024 National Conference",
+          "Co-authored \"Integrating Machine Learning and Citizen Science in CS-FLARE\", presented at AGU 2024 National Conference",
           "Processed satellite and citizen-science datasets to surface actionable wildfire risk signals",
         ],
         skills: ["Flutter", "Dart", "TensorFlow Lite", "YOLOv8", "Python"],
@@ -85,30 +85,29 @@ export const SECTION_CONTENT: { items: Item[] }[] = [
 
   // ── projects ──────────────────────────────────────────────────────
   { items: [
-      { title: "leena's music brain", meta: "2025", art: "vibegraph",
-        bullets: [
-          "Pulled 5 years of Spotify streaming history via the API, enriched each track with Spotify audio features (energy, valence, tempo, danceability), and embedded track metadata with OpenAI text-embedding-3-small",
-          "Built a knowledge graph in NetworkX with weighted edges from co-listening patterns, then ran Louvain community detection to surface 17 natural mood clusters",
-          "Positioned clusters in 2D using UMAP on the full embedding matrix — cluster centroids in energy/valence space give the axes semantic meaning (calm↔hype, dark↔positive)",
-          "Rendered the full 630-node scatter plot on an HTML Canvas with phyllotaxis jitter per cluster, hover hit-detection, and click-to-zoom into a detail view showing within-cluster edges and top artists",
-        ],
-        skills: ["Python", "OpenAI", "NetworkX", "UMAP", "React", "TypeScript", "Canvas 2D"],
-        media: [{ type: "embed", kind: "vibegraph" }] },
+
       { title: "clerkflow", meta: "2025", art: "civic",
         bullets: [
-          "Ingests municipal PDFs (budgets, resolutions, ordinances, minutes) through an agentic profiler: Claude Haiku reads the first N pages to classify document type and extract structured metadata before routing to the pipeline",
-          "Triple-store architecture: Postgres for structured facts, pgvector + Voyage AI embeddings for semantic retrieval, and Neo4j for entity-relationship graphs — all unified behind a single natural-language query interface",
-          "Extensible document type registry — adding a new document type requires only a Pydantic schema definition, zero changes to the ingestion pipeline",
-          "Tesseract OCR + pdf2image fallback for scanned PDFs, with Claude Vision for complex slide-deck layouts; bounded-concurrency async loader for batch ingestion; LLM-judge test harness scoring answer quality against a golden set",
+          "A clerk shouldn't have to spend a weekend digging through PDFs to answer \"did we already authorize this?\" Clerkflow reads a city's raw records and builds a structured understanding of how that government actually works: people, departments, resolutions, vendors, grants, and votes assembled into a searchable knowledge graph.",
+          "Ingests municipal PDFs through an agentic profiler: Claude Haiku classifies document type and extracts structured metadata before routing to the pipeline; Tesseract OCR + Claude Vision handle scanned and complex layouts",
+          "Triple-store architecture: Postgres for structured facts, pgvector + Voyage AI embeddings for semantic search, and Neo4j for entity graphs, unified behind a single natural-language query interface",
         ],
         skills: ["Python", "Flask", "Claude", "pgvector", "Neo4j", "PostgreSQL"],
         media: [{ type: "iframe", url: "https://council-knowledge-base.vercel.app/" }] },
+      { title: "leena's music brain", meta: "2025", art: "vibegraph",
+        bullets: [
+          "Pulled five years of Spotify streaming history and enriched ~2,000 tracks with nine audio features (ReccoBeats API), cached in SQLite",
+          "Maps the whole library with seeded UMAP so on-screen distance means real audio similarity, coloured along a continuous calm→hype spectrum (PCA)",
+          "Interactive Canvas viz: a biplot \"vibe compass\" showing which trait rises in each direction, and click any track to surface its nearest neighbours with a 9-axis radar",
+        ],
+        skills: ["TypeScript", "React", "SQLite", "UMAP", "PCA", "Louvain", "Canvas 2D"],
+        media: [{ type: "embed", kind: "vibegraph" }] },
       { title: "wyrather", meta: "2025", art: "route",
         bullets: [
-          "Daily \"would you rather\" polls with real-time head-to-head debates — users vote, see live split counts, then enter a matchmaking queue to argue against someone who voted the opposite way",
-          "All write paths run through Next.js server actions with Zod validation; Postgres Row-Level Security enforces a fully read-only browser client — no direct table access from the frontend",
+          "Daily \"would you rather\" polls with real-time head-to-head debates, where users vote, see live split counts, then enter a matchmaking queue to argue against someone who voted the opposite way",
+          "All write paths run through Next.js server actions with Zod validation; Postgres Row-Level Security enforces a fully read-only browser client, with no direct table access from the frontend",
           "Atomic PL/pgSQL functions (cast_vote, join_debate, like_comment) eliminate race conditions under concurrent load; debate matchmaking queue uses a 5-second heartbeat ping and 30-second freshness window to filter ghost users",
-          "Anonymous-to-authenticated account upgrade via Supabase identity linking — Google OAuth and magic-link email both preserve all prior anonymous votes and history with zero data loss",
+          "Anonymous-to-authenticated account upgrade via Supabase identity linking, so Google OAuth and magic-link email both preserve all prior anonymous votes and history with zero data loss",
         ],
         skills: ["Next.js", "TypeScript", "Supabase", "PostgreSQL", "Row-Level Security"],
         media: [{ type: "iframe", url: "https://wyrather.me/" }] },
@@ -125,7 +124,7 @@ export const SECTION_CONTENT: { items: Item[] }[] = [
 
   // ── school ────────────────────────────────────────────────────────
   { items: [
-      { title: "Massachusetts Institute of Technology", meta: "BS CS · AI & Decision Making + Physics · Class of 2029", art: "dome",
+      { title: "Massachusetts Institute of Technology", meta: "BS CS · Computer Science & Engineering · Class of 2029", art: "dome",
         bullets: [
           "Intro to Programming & CS",
           "Fundamentals of Programming",
@@ -151,11 +150,30 @@ export const SECTION_CONTENT: { items: Item[] }[] = [
           { name: "Disney Dreamer" },
           { name: "NYSC Delegate" },
         ] },
+      { title: "fifa + mit sports lab", meta: "ML Research · Last Touch Project · Sept 2025 – present", art: "soccer",
+        bullets: [
+          "Analyzing the accuracy of an ML last-touch detection system on FIFA’s optical tracking data, quantifying how reliably it identifies the last player to contact the ball and the exact moment of contact across full World Cup matches",
+          "Characterized model error against frame-accurate ground truth: temporal deviation (predicted vs. true contact frame) and correct last-toucher identification, broken out by event type and difficulty (deflections, near-simultaneous touches, grazing contact, occluded players)",
+          "Assessed evaluation reliability with inter-annotator agreement, bounding label noise so the measured error reflects the model rather than the reference, the difference between a trustworthy accuracy number and a misleading one",
+          "Translated the error analysis into a readiness assessment: whether last-touch timestamps are precise enough to support referee/VAR review of restart decisions (throw-ins, corners, goal kicks)",
+          "Findings feed the decision to keep not-yet-ready technology out of live competition, favoring rigorous evaluation over premature deployment, a real win for research integrity in the sport",
+        ],
+        skills: ["Python", "Pandas", "Model Evaluation", "Error Analysis", "Statistical Analysis", "Inter-Annotator Agreement", "Optical Tracking", "Computer Vision"] },
+      { title: "mit urban risk lab", meta: "Remote Sensing & Geospatial ML · Sept – Dec 2025", art: "geo",
+        bullets: [
+          "Built an interactive Google Earth Engine app for land-cover similarity search over DeepMind AlphaEarth annual satellite embeddings: draw a region of interest, drop labeled points on the map, and it maps every pixel matching that feature's signature",
+          "Implemented the similarity engine: samples the embedding vector at each labeled point, scores every pixel by dot-product similarity to those samples, thresholds, and vectorizes the matches into clean polygons for a labeled map",
+          "Ran supervised classification over the embeddings (random forest, 70/30 train-test split, evaluated with confusion matrices and per-class accuracy) to map fine-grained land classes across a region",
+          "Quantified multi-year change by differencing annual embeddings and computing area gained and lost in km2 (2019 to 2021), then validated the result against JRC Global Surface Water reference data, matching to within ~0.0025 km2",
+          "Contributing to a method for quantifying ecosystem-health change from Traditional Ecological Knowledge (TEK) informed embeddings: turning community-defined labels (healthy, recovering, declining), ground-truthed via COPIN community mapping, into an Ecosystem Health Score tracked from 2017 to 2025",
+        ],
+        skills: ["Google Earth Engine", "AlphaEarth Embeddings", "JavaScript", "Python", "Random Forest", "Change Detection", "Remote Sensing", "Geospatial Analysis"],
+        media: [{ type: "iframe", url: "https://jovial-arch-473418-s0.projects.earthengine.app/view/similarity-search", label: "Live Earth Engine App" }] },
       { title: "momentum x blue origin", meta: "MIT x Blue Origin Design Challenge · 2024-2025", art: "launch",
         bullets: [
-          "Selected for MIT Momentum, a systems engineering challenge run by Blue Origin engineers — tasked with designing minimum-mass infrastructure to sustain a 5,000-person Mars colony from 2075 to 2125",
+          "Selected for MIT Momentum, a systems engineering challenge run by Blue Origin engineers, tasked with designing minimum-mass infrastructure to sustain a 5,000-person Mars colony from 2075 to 2125",
           "Led Communications, Data, and Shelter: designed a 3-layer comms stack (UHF orbital relay, S-band direct-to-Earth, Ka-band high-speed video via 4 HTS satellites) with a per-person bandwidth cap of 3.5 hrs/day",
-          "Designed autonomous positioning using celestial tracking, PNT technology, and pseudolites to replace GPS; added Terrain Relative Navigation for precision landing — no GPS exists on Mars",
+          "Designed autonomous positioning using celestial tracking, PNT technology, and pseudolites to replace GPS; added Terrain Relative Navigation for precision landing; no GPS exists on Mars",
           "Proposed an on-colony data center to eliminate the 20-minute Earth round-trip delay for real-time operational decisions",
           "Phased shelter plan: Sierra Space LIFE 1400 modules through 2060 transitioning to lava tubes reinforced with MarsCrete; evaluated Hebrus Valles and Arsia Mons as candidate sites",
         ],
@@ -164,38 +182,38 @@ export const SECTION_CONTENT: { items: Item[] }[] = [
       { title: "distance & delay research", meta: "MIT 11.158 Research Paper · Dec 2025", art: "transit",
         bullets: [
           "Designed and ran an original survey of 75 MIT students on commute distance, primary mode, max wait tolerance, and behavioral response to transit delays",
-          "Key finding: longer commutes do not build patience — students adapt by switching to autonomous, schedule-independent modes (biking/scootering) to avoid waiting, rather than developing tolerance for delays",
+          "Key finding: longer commutes do not build patience; students adapt by switching to autonomous, schedule-independent modes (biking/scootering) to avoid waiting, rather than developing tolerance for delays",
           "Transit users showed highest waiting tolerance (mean 15 min) vs. bikers and scooter users (mean 3 min), driven by behavioral habituation to headway-based systems rather than by commute distance",
           "72-83% of respondents across all distance groups switched modes immediately when faced with an 8-minute delay, showing strong preference for control and predictability over scheduled transit",
           "Findings suggest campus planners should prioritize reducing uncertainty (real-time arrivals, reliable headways) over raw wait-time reduction to retain low-carbon mode share",
         ],
         skills: ["Python", "Pandas", "Matplotlib", "Survey Design", "Statistical Analysis", "Google Forms"],
         media: [{ type: "pdf", url: "/distance-delay-research.pdf", label: "Research Paper" }] },
-      { title: "FIFA + MIT Sports Lab", meta: "ML & Data Analysis · Sept 2025 – present", art: "soccer",
-        bullets: [
-          "Developing an ML model that predicts last-touch events from FIFA’s optical tracking data to support referee decision-making",
-          "Built annotated datasets of player positions and ball trajectories; engineering features from spatial and temporal tracking signals",
-        ],
-        skills: ["Python", "Machine Learning", "Data Annotation", "Computer Vision", "Pandas"] },
-      { title: "MIT Urban Risk Lab", meta: "Remote Sensing & Geospatial · Sept – Dec 2025", art: "geo",
-        bullets: [
-          "Used Google Earth Engine and DeepMind AlphaEarth embeddings to detect land-use change and climate stressors at scale",
-          "Built spatial models and maps for local resilience planning and ecological restoration targeting",
-        ],
-        skills: ["Google Earth Engine", "Python", "Remote Sensing", "Geospatial Analysis"] },
     ] },
 
   // ── service ───────────────────────────────────────────────────────
   { items: [
-      { title: "Cambridge Public Schools", meta: "Volunteer", art: "mentor", todo: true,
+      { title: "Cambridge Public Schools", meta: "Cambridge School Volunteers · Tutor", art: "mentor",
         bullets: [
-          "Volunteer supporting students in the Cambridge public school system",
-          "Add what you do — tutoring, classroom support, subject and grade level",
+          "Volunteer tutor with Cambridge School Volunteers (CSV), serving Grades 6-8 students in after-school Learning Centers!",
+          "Matched one-on-one with a student referred by their teacher: help with homework, reinforce study skills, and provide general academic coaching in a supportive setting",
         ] },
-      { title: "Million Girls Moonshot", meta: "White House Initiative, Mentor", art: "rocket",
+      { title: "Million Girls Moonshot", meta: "Flight Crew · STEM Advocate", art: "rocket",
         bullets: [
-          "Selected as a Flight Crew member for the White House’s Million Girls Moonshot — a national initiative to close the gender gap in STEM by connecting girls with hands-on maker and engineering experiences",
-          "Serve as a youth ambassador: represent the initiative at events, share personal STEM journey, and encourage the next generation of women in science and engineering",
+          "Selected nationally as a member of the Million Girls Moonshot Flight Crew, sponsored by the Intel Foundation and the Geena Davis Institute on Gender in Media, working to close the gender gap in STEM",
+          "Partner with the U.S. Department of Education and the White House National Space Council as a youth ambassador encouraging girls' engagement in STEM fields",
+          "Recognized by Vice President Kamala Harris: \"Through your advocacy and your outreach, you are helping to build a STEM workforce that reflects the diversity of this country. This work will drive innovation and empower generations of future STEM leaders.\"",
+        ] },
+      { title: "Heartland STEM", meta: "President · 501(c)(3) · Jun 2023 – May 2025", art: "mentor",
+        bullets: [
+          "Ran a 501(c)(3) nonprofit in partnership with UnitedHealthcare, soliciting grants from 600 schools across Kansas and Nebraska",
+          "Reviewed grant applications and distributed approximately $15,000 each year to fund student STEM programs",
+        ] },
+      { title: "FIRST Tech Challenge · Cobalt Colts 6547", meta: "STEM Outreach & Mentorship · 2021 – 2025", art: "robot",
+        bullets: [
+          "Mentor in the Global Robotics Exchange, a four-week virtual program connecting the Cobalt Colts with FTC teams from Morocco and Libya",
+          "Ran hands-on robot demos and STEM activities across the community: taught hundreds of kids to drive robots at the MO State Fair, plus Museum @ Prairiefire, Ronald McDonald House, Girl Scouts Robotics Badge Day, Cedar Hills Y-Care, and local carnivals",
+          "Built a wheelchair costume for two children and connected FTC teams across the nation with kids needing wheelchair costumes",
         ] },
       { title: "Business Professionals of America", meta: "Kansas State Officer", art: "mentor",
         bullets: [
@@ -203,26 +221,16 @@ export const SECTION_CONTENT: { items: Item[] }[] = [
           "Represented Kansas members at national leadership conferences; led professional development sessions and workshops for local chapters statewide",
           "Organized and oversaw competitive events; collaborated with the state board to set chapter priorities and expand BPA’s reach across Kansas high schools",
         ] },
-      { title: "inTandem", meta: "Fellow", art: "mentor", todo: true,
-        bullets: [
-          "Fellow working to help young people develop a sense of purpose and direction",
-          "Add what this looks like in practice — 1:1 mentorship, group sessions, curriculum?",
-        ] },
-      { title: "Girls Who Code", meta: "Mentor", art: "mentor", todo: true,
-        bullets: [
-          "Mentor supporting girls learning to code through Girls Who Code",
-          "Add specifics — where, ages/grades, what a session looks like",
-        ] },
     ] },
 
   // ── hobbies ───────────────────────────────────────────────────────
   { items: [
       { title: "basketball", art: "basketball", todo: true,
-        bullets: ["Add a line — where you play, favorite team, pickup vs. league"] },
+        bullets: ["Add a line: where you play, favorite team, pickup vs. league"] },
       { title: "singing", art: "music", todo: true,
-        bullets: ["Add a line — Ohms Acapella at MIT? solo? your go-to song"] },
+        bullets: ["Add a line: Ohms Acapella at MIT? solo? your go-to song"] },
       { title: "rollercoasters · obviously", art: "coaster", todo: true,
-        bullets: ["The thread running through this whole site", "Add favorites — top coaster, dream park, biggest drop"] },
+        bullets: ["The thread running through this whole site", "Add favorites: top coaster, dream park, biggest drop"] },
     ] },
 ];
 
@@ -248,7 +256,7 @@ const DX = DESCENT_R.map(dr => WAVE_END_X + dr); // [915,935,955,975,995]
 // ── Phase 2 wave geometry ─────────────────────────────────────────────────────
 // Lines turn from DOWN→LEFT at P2_TURN_Y using turn radius P2_TR[i].
 // Because DX[i] - P2_TR[i] = 865 for all i, all lines arrive at the same
-// x after the corner — they bundle vertically and wave together.
+// x after the corner - they bundle vertically and wave together.
 const P2_TURN_Y = 130;
 const P2_TR     = [50, 70, 90, 110, 130] as const; // turn radii
 const P2_AMP    = 95;   // peak wave amplitude (±y at the middle of the coil)
@@ -279,7 +287,7 @@ const P2B_N   = 4;    // number of petals (up, down, up, down)
 const P2B_CC  = 250;  // flourish midline y for pink; each strand nests +22 below
 const P2B_RUN = 70;   // level run after the right turn, before the petals
 
-// Phase 3 columns — a strand lands where its post-flourish descent drops.
+// Phase 3 columns - a strand lands where its post-flourish descent drops.
 const CONTACT_X = P2_LOOP_X.map(
   (x) => x + 2 * P2_QTR + P2B_RUN + P2B_M * P2B_N * 2 * Math.PI
 );
@@ -331,7 +339,7 @@ function phase2Path(i: number): string {
   const tr = P2_TR[i];
   const ey = P2_TURN_Y;
   const cy = ey + tr;       // ribbon centre y for this line
-  const wx = P2_WAVE_X;    // 865 — x where wave begins (same for all)
+  const wx = P2_WAVE_X;    // 865 - x where wave begins (same for all)
 
   // ── top turn: DOWN→LEFT, CW quarter-circle ─────────────────────────────
   // Bezier: arrive at (dx,ey) going down, depart (wx,cy) going left
@@ -377,7 +385,7 @@ function phase2Path(i: number): string {
 }
 
 /**
- * Phase 2b path for line i (own sticky screen — the coil is scrolled away):
+ * Phase 2b path for line i (own sticky screen - the coil is scrolled away):
  *   enter from top at this strand's descent x
  *   → 90° arc DOWN→RIGHT → level run
  *   → P2B_N alternating petal loops (up, down, up, down)
@@ -601,7 +609,7 @@ export default function App() {
   const [activeSection, setActiveSection] = useState<number | null>(null);
   const [hoverSection, setHoverSection]   = useState<number | null>(null);
 
-  // Scroll nudge — appears 2s after load, fades as soon as user scrolls
+  // Scroll nudge - appears 2s after load, fades as soon as user scrolls
   const [nudgeVisible, setNudgeVisible] = useState(false);
   useEffect(() => {
     const t = setTimeout(() => setNudgeVisible(true), 2000);
@@ -609,12 +617,12 @@ export default function App() {
   }, []);
   const scrollHintOpacity = nudgeVisible ? Math.max(0, 1 - p1 * 25) : 0;
 
-  // Phase 2 draws from the moment it enters — the path starts with the
+  // Phase 2 draws from the moment it enters - the path starts with the
   // vertical stripe segment so the stripe above the wave is always the
   // "already drawn" portion of the animated path (no static lines needed).
   const waveProgress = p2;
 
-  // Phase 3 — stage 1 (0→0.5): strands land + perspective floor grows.
+  // Phase 3 - stage 1 (0→0.5): strands land + perspective floor grows.
   //           stage 2 (0.5→1): bars cast UP from floor, then widen to full-bleed; floor fades.
   const ease3 = (t: number) => { const c = Math.max(0, Math.min(1, t)); return c * c * (3 - 2 * c); };
   const p3s1 = Math.min(1, p3 / 0.5);
@@ -665,7 +673,7 @@ export default function App() {
             background:"linear-gradient(90deg,#F04878,#F09820,#A85C2A,#2D9B68,#2898A8)",
             opacity:Math.min(1,p1*6) }} />
 
-          {/* Scroll nudge — fades in after 2s, vanishes as soon as scrolling starts */}
+          {/* Scroll nudge - fades in after 2s, vanishes as soon as scrolling starts */}
           <div className="absolute bottom-10 left-1/2 z-30 pointer-events-none flex flex-col items-center gap-2"
             style={{ transform: "translateX(-50%)", opacity: scrollHintOpacity, transition: "opacity 0.5s ease" }}>
             <span style={{ fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:"0.65rem",
@@ -682,12 +690,12 @@ export default function App() {
         </div>
       </div>
 
-{/* Skip to portfolio — fixed pill, appears after a little scroll, hides once portfolio is live */}
+{/* Skip to portfolio - fixed pill, appears after a little scroll, hides once portfolio is live */}
       <button
         onClick={() => {
           const el = p3Ref.current;
           if (!el) return;
-          // Columns become visible at p3 ≈ 0.875 — scroll to 96% through Phase 3
+          // Columns become visible at p3 ≈ 0.875 - scroll to 96% through Phase 3
           window.scrollTo({ top: el.offsetTop + el.offsetHeight * 0.96, behavior: "smooth" });
         }}
         style={{
@@ -721,9 +729,9 @@ export default function App() {
 
             {/* Continuity with Phase 1: at progress 0 the strands are full-height
                 verticals (matching Phase 1's last frame).  Stage 1 (p<δ): the tail
-                below the turn retracts upward — still ONE straight line.  Stage 2:
+                below the turn retracts upward - still ONE straight line.  Stage 2:
                 only then does the tip curve away into the wave.  At every instant
-                each strand is a single unbroken line — never cut, never forked. */}
+                each strand is a single unbroken line - never cut, never forked. */}
             {SECTIONS.map((s, i) => {
               const len   = p2Len[i];
               const entry = P2_TURN_Y + 10;               // pre-drawn entry length
@@ -756,7 +764,7 @@ export default function App() {
           <svg viewBox={`0 0 ${VW} ${VH}`} preserveAspectRatio="none"
             className="absolute inset-0 w-full h-full" overflow="hidden">
             {/* Same continuity trick as Phase 2: full-height at progress 0, tail
-                pulls up first, THEN the flourish draws — one unbroken line. */}
+                pulls up first, THEN the flourish draws - one unbroken line. */}
             {SECTIONS.map((s, i) => {
               const len   = p2bLen[i];
               const yv    = P2B_CC + i * 22 - P2_QTR;  // turn y (matches phase2bPath)
@@ -788,7 +796,7 @@ export default function App() {
           <svg viewBox={`0 0 ${VW} ${VH}`} preserveAspectRatio="none"
             className="absolute inset-0 w-full h-full" overflow="hidden">
             <defs>
-              {/* perspective rays reveal — grows downward from the floor during stage 1 */}
+              {/* perspective rays reveal - grows downward from the floor during stage 1 */}
               <clipPath id="ray-clip">
                 <rect x="0" y={FLOOR_Y} width={VW}
                   height={Math.max(0, floorGrow * (VH - FLOOR_Y + 60))} />
@@ -835,7 +843,7 @@ export default function App() {
           <Caption p={p3} at={0.08} fadeOut={0.52} x="20%"  y="15%">hope you enjoyed the ride!</Caption>
           <Caption p={p3} at={0.3}  fadeOut={0.52} x="65%" y="25%">now more about me…</Caption>
 
-          {/* Interactive column layer — fades in with animation, handles expand/collapse */}
+          {/* Interactive column layer - fades in with animation, handles expand/collapse */}
           <div className="absolute inset-0 flex"
             style={{ opacity: p3LabelOpacity, pointerEvents: p3LabelOpacity > 0 ? "auto" : "none" }}>
             {SECTIONS.map((s, i) => {
@@ -872,7 +880,7 @@ export default function App() {
                     outline: "none",
                   }}
                 >
-                  {/* Label — big when default, rotated when collapsed */}
+                  {/* Label - big when default, rotated when collapsed */}
                   <span style={{
                     fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 500,
                     letterSpacing: "-0.01em", textTransform: "lowercase",
@@ -888,7 +896,7 @@ export default function App() {
                     {s.title}
                   </span>
 
-                  {/* Expand affordance — visible only in default (not active, not collapsed) state */}
+                  {/* Expand affordance - visible only in default (not active, not collapsed) state */}
                   {!isActive && !isCollapsed && (
                     <div style={{
                       position: "absolute", bottom: "1.15rem", left: "50%",
@@ -904,7 +912,7 @@ export default function App() {
                     </div>
                   )}
 
-                  {/* Expanded content — header + section component */}
+                  {/* Expanded content - header + section component */}
                   <motion.div
                     style={{
                       position: "absolute", inset: 0,
