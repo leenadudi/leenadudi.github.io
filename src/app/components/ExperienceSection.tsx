@@ -1,8 +1,9 @@
 import type { Item, Media } from "../App";
+import { rgba } from "../lib/color";
 
 export default function ExperienceSection({ items, ink }: { items: Item[]; ink: string }) {
   return (
-    <div style={{
+    <div className="section-scroll" style={{
       flex: 1, minHeight: 0, overflowY: "auto",
       display: "flex", flexDirection: "column",
     }}>
@@ -14,65 +15,71 @@ export default function ExperienceSection({ items, ink }: { items: Item[]; ink: 
 }
 
 function Row({ item, ink, last }: { item: Item; ink: string; last: boolean }) {
-  // meta format: "Role · Dates · Location"
-  const parts = (item.meta ?? "").split(" · ");
-  const role     = parts[0] ?? "";
-  const dates    = parts[1] ?? "";
-  const location = parts.slice(2).join(" · ");
+  // meta format: "Role · Dates · Location" (any part may be missing). The part
+  // that contains a year (or "present") is the date; everything else is the
+  // role / organisation line.
+  const parts   = (item.meta ?? "").split(" · ").filter(Boolean);
+  const isDate  = (s: string) => /\b(19|20)\d{2}\b|\bpresent\b/i.test(s);
+  const dates   = parts.find(isDate) ?? "";
+  const rest    = parts.filter(p => p !== dates);
+  const role     = rest[0] ?? "";
+  const location = rest.slice(1).join(" · ");
 
   return (
-    <div style={{
+    <article style={{
       padding: "1.1rem 0",
       borderBottom: last ? "none" : `1px solid ${rgba(ink, 0.13)}`,
     }}>
-      {/* Company + date */}
+      {/* Company + date (wraps onto two lines on narrow screens) */}
       <div style={{
-        display: "flex", justifyContent: "space-between",
-        alignItems: "baseline", gap: "0.75rem",
+        display: "flex", justifyContent: "space-between", flexWrap: "wrap",
+        alignItems: "baseline", gap: "0.2rem 0.75rem",
       }}>
-        <span style={{
+        <h3 style={{
           fontFamily: "'Plus Jakarta Sans', sans-serif",
           fontWeight: 700,
           fontSize: "clamp(1rem, 1.9vw, 1.15rem)",
           letterSpacing: "-0.01em",
-          color: ink,
+          color: ink, margin: 0, lineHeight: 1.25,
         }}>
           {item.title}
-        </span>
-        <span style={{
-          fontSize: "clamp(0.72rem, 1.25vw, 0.82rem)",
-          color: ink, opacity: 0.52,
-          whiteSpace: "nowrap", flexShrink: 0,
-          fontVariantNumeric: "tabular-nums",
-        }}>
-          {dates}
-        </span>
+        </h3>
+        {dates && (
+          <span style={{
+            fontSize: "clamp(0.72rem, 1.25vw, 0.82rem)",
+            color: ink, opacity: 0.6,
+            whiteSpace: "nowrap", flexShrink: 0,
+            fontVariantNumeric: "tabular-nums",
+          }}>
+            {dates}
+          </span>
+        )}
       </div>
 
       {/* Role + location */}
       {(role || location) && (
         <div style={{
           marginTop: "0.22rem",
-          fontSize: "clamp(0.75rem, 1.3vw, 0.85rem)",
+          fontSize: "clamp(0.78rem, 1.3vw, 0.88rem)",
           color: ink, opacity: 0.8,
           fontStyle: "italic",
         }}>
-          {role}{location ? <span style={{ opacity: 0.9 }}>{" · "}{location}</span> : null}
+          {role}{location ? <span>{" · "}{location}</span> : null}
         </div>
       )}
 
       {/* Bullets */}
       <ul style={{
         listStyle: "none", margin: "0.6rem 0 0", padding: 0,
-        display: "flex", flexDirection: "column", gap: "0.3rem",
+        display: "flex", flexDirection: "column", gap: "0.35rem",
       }}>
         {item.bullets.map((b, j) => (
           <li key={j} style={{
             display: "flex", gap: "0.5rem",
-            fontSize: "clamp(0.84rem, 1.5vw, 0.96rem)",
-            lineHeight: 1.48, color: ink, opacity: 1,
+            fontSize: "clamp(0.86rem, 1.5vw, 0.96rem)",
+            lineHeight: 1.5, color: ink,
           }}>
-            <span style={{ opacity: 0.38, flexShrink: 0, userSelect: "none" }}>-</span>
+            <span aria-hidden style={{ opacity: 0.38, flexShrink: 0 }}>-</span>
             <span>{b}</span>
           </li>
         ))}
@@ -86,9 +93,9 @@ function Row({ item, ink, last }: { item: Item; ink: string; last: boolean }) {
         }}>
           {item.skills?.map((s, j) => (
             <span key={j} style={{
-              padding: "2px 9px",
+              padding: "3px 10px",
               borderRadius: "99px",
-              fontSize: "clamp(0.67rem, 1.1vw, 0.76rem)",
+              fontSize: "clamp(0.68rem, 1.1vw, 0.76rem)",
               fontFamily: "'Plus Jakarta Sans', sans-serif",
               fontWeight: 500,
               letterSpacing: "0.02em",
@@ -101,9 +108,9 @@ function Row({ item, ink, last }: { item: Item; ink: string; last: boolean }) {
           ))}
           {item.media?.filter((m): m is Extract<Media, { type: "pdf" }> => m.type === "pdf").map((m, j) => (
             <a key={j} href={m.url} target="_blank" rel="noreferrer" style={{
-              padding: "2px 10px",
+              padding: "3px 11px",
               borderRadius: "99px",
-              fontSize: "clamp(0.67rem, 1.1vw, 0.76rem)",
+              fontSize: "clamp(0.68rem, 1.1vw, 0.76rem)",
               fontFamily: "'Plus Jakarta Sans', sans-serif",
               fontWeight: 600,
               letterSpacing: "0.02em",
@@ -117,14 +124,6 @@ function Row({ item, ink, last }: { item: Item; ink: string; last: boolean }) {
           ))}
         </div>
       )}
-    </div>
+    </article>
   );
-}
-
-function rgba(hex: string, a: number) {
-  const c = hex.replace("#", "");
-  const r = parseInt(c.slice(0, 2), 16);
-  const g = parseInt(c.slice(2, 4), 16);
-  const b = parseInt(c.slice(4, 6), 16);
-  return `rgba(${r},${g},${b},${a})`;
 }

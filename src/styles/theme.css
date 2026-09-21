@@ -119,6 +119,9 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* Full-screen sticky stages for the scroll ride */
+.stage { height: 100vh; height: 100dvh; }
+
 @keyframes scroll-nudge-bounce {
   0%, 100% { transform: translateY(0); }
   50%       { transform: translateY(7px); }

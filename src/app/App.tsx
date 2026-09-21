@@ -1,10 +1,16 @@
-import { useRef, useLayoutEffect, useState, useEffect } from "react";
+import { useRef, useLayoutEffect, useState, useEffect, useMemo } from "react";
 import { useScroll, motion } from "motion/react";
 import PortfolioItems from "./components/PortfolioItems";
 import ExperienceSection from "./components/ExperienceSection";
 import ProjectsSection from "./components/ProjectsSection";
 import SchoolSection from "./components/SchoolSection";
 import HobbiesSection from "./components/HobbiesSection";
+import { useFinePointer, useNarrow, useViewport } from "./hooks/useMediaQuery";
+import { labelColor, rgba } from "./lib/color";
+
+export { labelColor };
+
+const EMAIL = "ldudi@mit.edu";
 
 const SECTIONS = [
   { id: "work",     title: "experience", color: "#34C8C5" },
@@ -51,7 +57,7 @@ export type Item = {
 export const SECTION_CONTENT: { items: Item[] }[] = [
   // ── experience (reverse-chronological) ───────────────────────────
   { items: [
-      { title: "Agent Vista", meta: "Software Engineer Intern · Jan 2026 – present · Cambridge, MA", art: "flow",
+      { title: "Agent Vista", meta: "Software Engineer Intern · Jan 2026 - present · Cambridge, MA", art: "flow",
         bullets: [
           "Built a document-ingestion and RAG search system: chunks PDFs via the Anthropic Claude Batch API, stores embeddings in PostgreSQL, and serves a query API answering natural-language questions over the documents; deployed on AWS ECS Fargate via Terraform with S3 storage and CodeBuild CI/CD",
           "Designed a multi-LLM business classification system: given a company name and website, predicts industry codes via pgvector semantic search, fuzzy text matching, and three model providers (Claude, Gemini, OpenAI); added hash-based change detection to cache results and sharply cut repeat API costs",
@@ -60,14 +66,14 @@ export const SECTION_CONTENT: { items: Item[] }[] = [
           "Shipped a PII-masking logging library adopted across Java microservices: per-rule configuration toggles and structured JSON field masking for safe, compliant application logs",
         ],
         skills: ["Python", "Java", "Spring Boot", "TypeScript", "Playwright", "PostgreSQL", "pgvector", "LLMs", "AWS ECS", "Terraform", "Docker", "Flask"] },
-      { title: "Bungii", meta: "FP&A / Data Analysis Intern · May – June 2025 · Overland Park, KS", art: "route",
+      { title: "Bungii", meta: "FP&A / Data Analysis Intern · May - June 2025 · Overland Park, KS", art: "route",
         bullets: [
           "Led an AI-driven dynamic driver pay project to improve margin efficiency across 15+ delivery markets",
           "Optimized last-mile delivery routes for 10+ enterprise clients, reducing operational overhead",
           "Conducted market research to scope expansion into the box-truck segment",
         ],
         skills: ["Python", "SQL", "Excel", "Pandas"] },
-      { title: "NASA · Earth Sciences Division", meta: "Climate Data Research Intern · May – Aug 2024 · Remote", art: "wildfire",
+      { title: "NASA · Earth Sciences Division", meta: "Climate Data Research Intern · May - Aug 2024 · Remote", art: "wildfire",
         bullets: [
           "Built a cross-platform wildfire-risk app in Flutter, running a YOLOv8 model on-device via TensorFlow Lite for real-time hazard detection",
           "Co-authored \"Integrating Machine Learning and Citizen Science in CS-FLARE\", presented at AGU 2024 National Conference",
@@ -75,7 +81,7 @@ export const SECTION_CONTENT: { items: Item[] }[] = [
         ],
         skills: ["Flutter", "Dart", "TensorFlow Lite", "YOLOv8", "Python"],
         media: [{ type: "pdf", url: "/cs-flare-paper.pdf", label: "CS-FLARE Research Paper" }] },
-      { title: "Kiewit Engineering", meta: "Financial Data Analysis Intern · June – July 2023 · Lenexa, KS", art: "grid",
+      { title: "Kiewit Engineering", meta: "Financial Data Analysis Intern · June - July 2023 · Lenexa, KS", art: "grid",
         bullets: [
           "Automated cost-report updates with custom Python scripts, eliminating manual data entry across a 500+ project billing ledger",
           "Consolidated and standardized a company-wide financial tracking spreadsheet spanning multiple divisions",
@@ -150,7 +156,7 @@ export const SECTION_CONTENT: { items: Item[] }[] = [
           { name: "Disney Dreamer" },
           { name: "NYSC Delegate" },
         ] },
-      { title: "fifa + mit sports lab", meta: "ML Research · Last Touch Project · Sept 2025 – present", art: "soccer",
+      { title: "fifa + mit sports lab", meta: "ML Research · Last Touch Project · Sept 2025 - present", art: "soccer",
         bullets: [
           "Analyzing the accuracy of an ML last-touch detection system on FIFA’s optical tracking data, quantifying how reliably it identifies the last player to contact the ball and the exact moment of contact across full World Cup matches",
           "Characterized model error against frame-accurate ground truth: temporal deviation (predicted vs. true contact frame) and correct last-toucher identification, broken out by event type and difficulty (deflections, near-simultaneous touches, grazing contact, occluded players)",
@@ -159,7 +165,7 @@ export const SECTION_CONTENT: { items: Item[] }[] = [
           "Findings feed the decision to keep not-yet-ready technology out of live competition, favoring rigorous evaluation over premature deployment, a real win for research integrity in the sport",
         ],
         skills: ["Python", "Pandas", "Model Evaluation", "Error Analysis", "Statistical Analysis", "Inter-Annotator Agreement", "Optical Tracking", "Computer Vision"] },
-      { title: "mit urban risk lab", meta: "Remote Sensing & Geospatial ML · Sept – Dec 2025", art: "geo",
+      { title: "mit urban risk lab", meta: "Remote Sensing & Geospatial ML · Sept - Dec 2025", art: "geo",
         bullets: [
           "Built an interactive Google Earth Engine app for land-cover similarity search over DeepMind AlphaEarth annual satellite embeddings: draw a region of interest, drop labeled points on the map, and it maps every pixel matching that feature's signature",
           "Implemented the similarity engine: samples the embedding vector at each labeled point, scores every pixel by dot-product similarity to those samples, thresholds, and vectorizes the matches into clean polygons for a labeled map",
@@ -204,12 +210,12 @@ export const SECTION_CONTENT: { items: Item[] }[] = [
           "Partner with the U.S. Department of Education and the White House National Space Council as a youth ambassador encouraging girls' engagement in STEM fields",
           "Recognized by Vice President Kamala Harris: \"Through your advocacy and your outreach, you are helping to build a STEM workforce that reflects the diversity of this country. This work will drive innovation and empower generations of future STEM leaders.\"",
         ] },
-      { title: "Heartland STEM", meta: "President · 501(c)(3) · Jun 2023 – May 2025", art: "mentor",
+      { title: "Heartland STEM", meta: "President · 501(c)(3) · Jun 2023 - May 2025", art: "mentor",
         bullets: [
           "Ran a 501(c)(3) nonprofit in partnership with UnitedHealthcare, soliciting grants from 600 schools across Kansas and Nebraska",
           "Reviewed grant applications and distributed approximately $15,000 each year to fund student STEM programs",
         ] },
-      { title: "FIRST Tech Challenge · Cobalt Colts 6547", meta: "STEM Outreach & Mentorship · 2021 – 2025", art: "robot",
+      { title: "FIRST Tech Challenge · Cobalt Colts 6547", meta: "STEM Outreach & Mentorship · 2021 - 2025", art: "robot",
         bullets: [
           "Mentor in the Global Robotics Exchange, a four-week virtual program connecting the Cobalt Colts with FTC teams from Morocco and Libya",
           "Ran hands-on robot demos and STEM activities across the community: taught hundreds of kids to drive robots at the MO State Fair, plus Museum @ Prairiefire, Ronald McDonald House, Girl Scouts Robotics Badge Day, Cedar Hills Y-Care, and local carnivals",
@@ -293,30 +299,26 @@ const CONTACT_X = P2_LOOP_X.map(
 );
 const FLOOR_Y = 300; // y where strands land in Phase 3
 
-// Label text color: cream on dark columns, warm-dark on light ones
-// Pick the higher-contrast ink for a given background — cream on dark sections,
-// dark teal on light ones (e.g. the orange projects panel) — via WCAG contrast.
+// ── Responsive scene padding ─────────────────────────────────────────────────
+// The scene is authored in a 1000×600 box. Instead of stretching it to the
+// viewport (which turns loops into ovals on phones and ultrawides), the box is
+// fitted with `xMidYMid meet` and the strands are extended past its edges by
+// `pad` so they still run screen-edge to screen-edge in every orientation.
+//   padX: extra scene units on the left/right when the screen is wider than 5:3
+//   padY: extra scene units on the top/bottom when the screen is taller than 5:3
+type Pad = { x: number; y: number };
+function scenePad(w: number, h: number): Pad {
+  if (!w || !h) return { x: 0, y: 0 };
+  const box = VW / VH;
+  const a = w / h;
+  if (a >= box) return { x: (VH * a - VW) / 2, y: 0 };
+  return { x: 0, y: (VW / a - VH) / 2 };
+}
 const CREAM = "#FDF6EC";
-const DARK_INK = "#000000";
-function relLuminance(hex: string): number {
-  const c = hex.replace("#", "").slice(0, 6);
-  const lin = [0, 2, 4].map((i) => {
-    const v = parseInt(c.slice(i, i + 2), 16) / 255;
-    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
-  });
-  return 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2];
-}
-function contrast(a: string, b: string): number {
-  const [hi, lo] = [relLuminance(a), relLuminance(b)].sort((x, y) => y - x);
-  return (hi + 0.05) / (lo + 0.05);
-}
-export function labelColor(hex: string): string {
-  return contrast(hex, DARK_INK) >= contrast(hex, CREAM) ? DARK_INK : CREAM;
-}
 
 // ── Path builders ─────────────────────────────────────────────────────────────
 
-function phase1Path(i: number): string {
+function phase1Path(i: number, pad: Pad): string {
   const y  = LINE_Y[i];
   const wt = WAVE_TOP_Y[i];
   const dr = DESCENT_R[i];
@@ -326,7 +328,7 @@ function phase1Path(i: number): string {
   const r  = LOOP_R;
   const bot = cy + r;              // loop entry/exit (6 o'clock)
   return [
-    `M -50,${y}`, `L ${APP_X},${y}`,
+    `M ${-50 - pad.x},${y}`, `L ${APP_X},${y}`,
     // flat strand sweeps up to the bottom of this line's own loop
     `C ${cx-130},${y} ${cx-60},${bot} ${cx},${bot}`,
     // full CW circle: bottom → right → top → left → bottom
@@ -337,7 +339,7 @@ function phase1Path(i: number): string {
     // leave the loop bottom and sweep up to the wave crest, then descend
     `C ${cx+100},${bot} ${WAVE_END_X-40},${wt} ${WAVE_END_X},${wt}`,
     `C ${WAVE_END_X+dr*K},${wt} ${dx},${wt+dr*(1-K)} ${dx},${wt+dr}`,
-    `L ${dx},${VH+10}`,
+    `L ${dx},${VH + 10 + pad.y}`,
   ].join(" ");
 }
 
@@ -350,7 +352,7 @@ function phase1Path(i: number): string {
  *   → straight run LEFT to this line's own drop x (staggers the loop stack)
  *   → 90° arc  LEFT→DOWN  → CW loop → descend off bottom
  */
-function phase2Path(i: number): string {
+function phase2Path(i: number, pad: Pad): string {
   const dx = DX[i];
   const tr = P2_TR[i];
   const ey = P2_TURN_Y;
@@ -390,13 +392,13 @@ function phase2Path(i: number): string {
     `C ${qStart - P2_QTR*K},${cy} ${qx},${cy + P2_QTR*(1-K)} ${qx},${qy}`;
 
   return [
-    `M ${dx},-10`,
+    `M ${dx},${-10 - pad.y}`,
     `L ${dx},${ey}`,
     topTurn,
     ...waveParts,
     runToLoop,
     quarterTurn,
-    `L ${qx},${VH + 10}`,   // descend off the bottom (flourish is Phase 2b)
+    `L ${qx},${VH + 10 + pad.y}`,   // descend off the bottom (flourish is Phase 2b)
   ].join(" ");
 }
 
@@ -407,7 +409,7 @@ function phase2Path(i: number): string {
  *   → P2B_N alternating petal loops (up, down, up, down)
  *   → 90° arc RIGHT→DOWN → descend off bottom
  */
-function phase2bPath(i: number): string {
+function phase2bPath(i: number, pad: Pad): string {
   const qx  = P2_LOOP_X[i];
   const qtr = P2_QTR;
   const cc  = P2B_CC + i * 22;   // flourish midline (strands nest downward)
@@ -439,20 +441,19 @@ function phase2bPath(i: number): string {
     `C ${xe + qtr*K},${cc} ${xe + qtr},${cc + qtr*(1-K)} ${xe + qtr},${cc + qtr}`;
 
   return [
-    `M ${qx},-10`,
+    `M ${qx},${-10 - pad.y}`,
     `L ${qx},${yv}`,     // vertical entry from the top
     downToRight,          // turn right
     ...petals,            // alternating petal flourish
     rightToDown,          // turn back down
-    `L ${(xe + qtr).toFixed(1)},${VH + 10}`,
+    `L ${(xe + qtr).toFixed(1)},${VH + 10 + pad.y}`,
   ].join(" ");
 }
 
 // ── Scroll captions ───────────────────────────────────────────────────────────
 const easeC = (t: number) => { const c = Math.max(0, Math.min(1, t)); return c * c * (3 - 2 * c); };
 
-/** Little narrator text that fades in at `at` (and optionally out at `fadeOut`)
- *  as the phase's scroll progress `p` advances. Position in % of the screen. */
+/** Paint-on-drag layer. Mouse only; the fade loop runs just while ink is on screen. */
 function DrawCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const drawingRef = useRef(false);
@@ -469,20 +470,26 @@ function DrawCanvas() {
 
     const ctx = canvas.getContext("2d")!;
     let lastDrawTime = 0;
+    let fading = false;
 
-    // Fade drawn content; hard-clear after 1.5s of no drawing to eliminate ghost traces
+    // Fade drawn content; hard-clear after 1.5s of no drawing, then stop the loop.
     const fade = () => {
       ctx.globalCompositeOperation = "destination-out";
       ctx.fillStyle = "rgba(0,0,0,0.08)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.globalCompositeOperation = "source-over";
-      if (lastDrawTime > 0 && performance.now() - lastDrawTime > 1500) {
+      if (performance.now() - lastDrawTime > 1500) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        lastDrawTime = 0;
+        fading = false;
+        return;
       }
       rafRef.current = requestAnimationFrame(fade);
     };
-    rafRef.current = requestAnimationFrame(fade);
+    const ensureFading = () => {
+      if (fading) return;
+      fading = true;
+      rafRef.current = requestAnimationFrame(fade);
+    };
 
     const onDown = (e: MouseEvent) => {
       drawingRef.current = true;
@@ -501,6 +508,7 @@ function DrawCanvas() {
       ctx.lineTo(e.clientX, e.clientY);
       ctx.stroke();
       lastPosRef.current = { x: e.clientX, y: e.clientY };
+      ensureFading();
     };
     const onUp = () => { drawingRef.current = false; lastPosRef.current = null; };
 
@@ -518,13 +526,14 @@ function DrawCanvas() {
   }, []);
 
   return (
-    <canvas ref={canvasRef} style={{
+    <canvas ref={canvasRef} aria-hidden style={{
       position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
       pointerEvents: "none", zIndex: 9998,
     }} />
   );
 }
 
+/** Small cream square cursor (mouse devices only). */
 function Cursor() {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -536,35 +545,39 @@ function Cursor() {
     const hide = () => { el.style.opacity = "0"; };
     const show = () => { el.style.opacity = "1"; };
     window.addEventListener("mousemove", move);
-    window.addEventListener("mouseleave", hide);
-    window.addEventListener("mouseenter", show);
+    document.documentElement.addEventListener("mouseleave", hide);
+    document.documentElement.addEventListener("mouseenter", show);
     return () => {
       window.removeEventListener("mousemove", move);
-      window.removeEventListener("mouseleave", hide);
-      window.removeEventListener("mouseenter", show);
+      document.documentElement.removeEventListener("mouseleave", hide);
+      document.documentElement.removeEventListener("mouseenter", show);
     };
   }, []);
   return (
-    <div ref={ref} style={{
+    <div ref={ref} aria-hidden style={{
       position: "fixed", top: 0, left: 0, zIndex: 99999,
       width: "10px", height: "10px",
-      background: "#FDF6EC",
-      boxShadow: "0 0 0 1px rgba(0,0,0,0.12)",
+      background: CREAM,
+      boxShadow: "0 0 0 1.5px rgba(0,0,0,0.5)",
       pointerEvents: "none", willChange: "transform",
       transform: "translate3d(-100px,-100px,0)",
     }} />
   );
 }
 
-function Caption({ p, at, fadeOut, x, y, rot = 0, size = "clamp(1.1rem,2.4vw,2rem)", children }: {
-  p: number; at: number; fadeOut?: number; x: string; y: string;
+/** Narrator text that fades in at `at` (and out at `fadeOut`) as the phase's
+ *  scroll progress `p` advances. Position in % of the screen; `nx`/`ny` override
+ *  the position on phones. */
+function Caption({ p, at, fadeOut, x, y, nx, ny, rot = 0, size = "clamp(1.05rem,2.4vw,2rem)", children }: {
+  p: number; at: number; fadeOut?: number; x: string; y: string; nx?: string; ny?: string;
   rot?: number; size?: string; children: React.ReactNode;
 }) {
+  const narrow = useNarrow();
   const on  = easeC((p - at) / 0.06);
   const off = fadeOut === undefined ? 1 : 1 - easeC((p - fadeOut) / 0.06);
   return (
-    <div className="absolute z-30 pointer-events-none" style={{
-      left: x, top: y, opacity: on * off,
+    <div className="absolute z-30 pointer-events-none" aria-hidden style={{
+      left: narrow && nx ? nx : x, top: narrow && ny ? ny : y, opacity: on * off,
       transform: `translateY(${(1 - on) * 16}px) rotate(${rot}deg)`,
       transformOrigin: "left top",
       fontFamily: "'Poppins',sans-serif", fontStyle: "italic", fontWeight: 400,
@@ -573,8 +586,24 @@ function Caption({ p, at, fadeOut, x, y, rot = 0, size = "clamp(1.1rem,2.4vw,2re
   );
 }
 
+// ── Layout constants ──────────────────────────────────────────────────────────
+/** Full-screen sticky stage. Height comes from the `.stage` class in theme.css
+ *  (`100dvh` so it tracks the mobile browser chrome, with a `100vh` fallback). */
+const stageStyle: React.CSSProperties = {
+  position: "sticky", top: 0, width: "100%", overflow: "hidden", background: CREAM,
+};
+
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function App() {
+  const narrow = useNarrow();
+  const finePointer = useFinePointer();
+  const { w: vw, h: vh } = useViewport();
+  const pad = useMemo(() => scenePad(vw, vh), [vw, vh]);
+
+  // Shorter ride on phones: a flick scrolls a lot, so fewer screens per phase.
+  const rideScale = narrow ? 0.72 : 1;
+  const phaseH = (vhUnits: number) => `${Math.round(vhUnits * rideScale)}vh`;
+
   // Phase 1
   const p1Ref   = useRef<HTMLDivElement>(null);
   const p1Paths = useRef<(SVGPathElement | null)[]>([]);
@@ -605,6 +634,8 @@ export default function App() {
   const [p2b, setP2b] = useState(0);
   useLayoutEffect(() => sp2b.on("change", setP2b), [sp2b]);
 
+  // Path lengths are re-measured after every render so a resize (which changes
+  // the padded geometry) keeps the dash animation in sync.
   useLayoutEffect(() => {
     const m = p1Paths.current.map(el => el?.getTotalLength() ?? 99999);
     if (!m.some(l => l >= 99999))
@@ -625,6 +656,13 @@ export default function App() {
   const [activeSection, setActiveSection] = useState<number | null>(null);
   const [hoverSection, setHoverSection]   = useState<number | null>(null);
 
+  // Escape closes an open section.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setActiveSection(null); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   // Scroll nudge - appears 2s after load, fades as soon as user scrolls
   const [nudgeVisible, setNudgeVisible] = useState(false);
   useEffect(() => {
@@ -644,54 +682,86 @@ export default function App() {
   const p3s1 = Math.min(1, p3 / 0.5);
   const p3s2 = Math.max(0, (p3 - 0.5) / 0.5);
   const floorGrow      = ease3(p3s1);                 // ray-clip reveal, stage 1
-  const barRise        = ease3(p3s2);                 // bar top: VH → 0 (rises from trapezoid base)
+  const barRise        = ease3(p3s2);                 // bar top: bottom edge → top edge
   const floorOpacity   = 1 - ease3(p3s2);             // floor fades as bars rise
   const p3LabelOpacity = ease3((p3s2 - 0.75) / 0.25); // labels last
 
+  // Padded scene extents (screen edges in scene units)
+  const sceneLeft   = -pad.x;
+  const sceneRight  = VW + pad.x;
+  const sceneTop    = -pad.y;
+  const sceneBottom = VH + pad.y;
+  const sceneW      = sceneRight - sceneLeft;
+  const sceneH      = sceneBottom - sceneTop;
+  const colLeft  = (i: number) => sceneLeft + (i * sceneW) / 5;
+  const colRight = (i: number) => sceneLeft + ((i + 1) * sceneW) / 5;
+
+  const svgProps = {
+    viewBox: `0 0 ${VW} ${VH}`,
+    preserveAspectRatio: "xMidYMid meet",
+    className: "absolute inset-0 w-full h-full",
+    overflow: "visible",
+    "aria-hidden": true,
+  } as const;
+
+  const portfolioLive = p3LabelOpacity > 0;
+  const skipVisible = p1 > 0.06 && p3LabelOpacity < 0.8;
+
   return (
     <>
-      <Cursor />
-      <DrawCanvas />
-      {/* ── Phase 1: name + M1 knot + M2 wave + M3 descent ── */}
-      <div ref={p1Ref} className="relative" style={{ height: "500vh" }}>
-        <div className="sticky top-0 w-screen h-screen overflow-hidden" style={{ background: "#FDF6EC" }}>
+      {finePointer && <Cursor />}
+      {finePointer && <DrawCanvas />}
+
+      {/* ── Phase 1: name + loop tower + wave + descent ── */}
+      <div ref={p1Ref} className="relative" style={{ height: phaseH(500) }}>
+        <div className="stage" style={stageStyle}>
           <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none"
-            style={{ opacity: nameOpacity }}>
+            style={{ opacity: nameOpacity, padding: "0 1.25rem", textAlign: "center" }}>
             <h1 style={{ fontFamily:"'Poppins',sans-serif", fontStyle:"italic", fontWeight:200,
-              fontSize:"clamp(3rem,10vw,8rem)", color:"#000000ff", letterSpacing:"-0.035em", lineHeight:0.92 }}>
+              fontSize:"clamp(3rem,10vw,8rem)", color:"#000000", letterSpacing:"-0.035em", lineHeight:0.92,
+              margin: 0 }}>
               leena dudi
             </h1>
-            <a href="mailto:ldudi@mit.edu" style={{
+            <p style={{
+              margin: "1rem 0 0",
+              fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 500,
+              fontSize: "clamp(0.85rem,1.5vw,1.05rem)", color: "#000000", opacity: 0.85,
+              letterSpacing: "0.01em",
+            }}>
+              computer science at MIT · class of 2029
+            </p>
+            <a href={`mailto:${EMAIL}`} style={{
               pointerEvents: "auto",
               fontFamily: "'Plus Jakarta Sans',sans-serif", fontStyle: "italic",
               fontSize: "clamp(0.8rem,1.4vw,1rem)", fontWeight: 400,
-              color: "#000000", opacity: 0.55, marginTop: "0.75rem",
+              color: "#000000", opacity: 0.55, marginTop: "0.35rem",
               textDecoration: "none", letterSpacing: "0.01em",
             }}>
-              ldudi@mit.edu
+              {EMAIL}
             </a>
           </div>
-          <svg viewBox={`0 0 ${VW} ${VH}`} preserveAspectRatio="none"
-            className="absolute inset-0 w-full h-full" overflow="hidden">
+          <svg {...svgProps}>
             {SECTIONS.map((s, i) => {
               const len = p1Len[i];
               return <path key={s.id} ref={el => { p1Paths.current[i] = el; }}
-                d={phase1Path(i)} stroke={s.color} strokeWidth={SW}
+                d={phase1Path(i, pad)} stroke={s.color} strokeWidth={SW}
                 fill="none" strokeLinecap="round" strokeLinejoin="round"
                 strokeDasharray={len} strokeDashoffset={Math.max(0, len*(1-p1))} />;
             })}
           </svg>
-          <Caption p={p1} at={0.1}  x="3%"  y="39%">i love rollercoasters :)</Caption>
-          <Caption p={p1} at={0.3}  x="42%" y="65%" rot={-20}>wanna take a ride with me?</Caption>
-          <Caption p={p1} at={0.7} x="95%" y="6%"  rot={58} size="clamp(1.2rem,2.4vw,2rem)">weeeee</Caption>
+          <Caption p={p1} at={0.1}  x="3%"  y="39%" ny="30%">i love rollercoasters :)</Caption>
+          <Caption p={p1} at={0.3}  x="42%" y="65%" nx="34%" ny="68%" rot={-20}>wanna take a ride with me?</Caption>
+          <Caption p={p1} at={0.7} x="95%" y="6%" nx="74%" ny="10%" rot={58} size="clamp(1.2rem,2.4vw,2rem)">weeeee</Caption>
           <div className="absolute bottom-0 left-0 h-px z-40" style={{
             width:`${p1*100}%`,
             background:"linear-gradient(90deg,#34C8C5,#DF84BD,#FC8A8E,#FFAE69,#FEE09D)",
             opacity:Math.min(1,p1*6) }} />
 
           {/* Scroll nudge - fades in after 2s, vanishes as soon as scrolling starts */}
-          <div className="absolute bottom-10 left-1/2 z-30 pointer-events-none flex flex-col items-center gap-2"
-            style={{ transform: "translateX(-50%)", opacity: scrollHintOpacity, transition: "opacity 0.5s ease" }}>
+          <div className="absolute left-1/2 z-30 pointer-events-none flex flex-col items-center gap-2"
+            aria-hidden
+            style={{ bottom: "calc(2.5rem + env(safe-area-inset-bottom, 0px))",
+              transform: "translateX(-50%)", opacity: scrollHintOpacity, transition: "opacity 0.5s ease" }}>
             <span style={{ fontFamily:"'Plus Jakarta Sans',sans-serif", fontSize:"0.65rem",
               letterSpacing:"0.18em", textTransform:"uppercase", color:"#000000", opacity:0.45 }}>
               scroll
@@ -706,7 +776,7 @@ export default function App() {
         </div>
       </div>
 
-{/* Skip to portfolio - fixed pill, appears after a little scroll, hides once portfolio is live */}
+      {/* Skip to portfolio - fixed pill, appears after a little scroll, hides once portfolio is live */}
       <button
         onClick={() => {
           const el = p3Ref.current;
@@ -714,22 +784,26 @@ export default function App() {
           // Columns become visible at p3 ≈ 0.875 - scroll to 96% through Phase 3
           window.scrollTo({ top: el.offsetTop + el.offsetHeight * 0.96, behavior: "smooth" });
         }}
+        aria-hidden={!skipVisible}
+        tabIndex={skipVisible ? 0 : -1}
         style={{
-          position: "fixed", bottom: "1.5rem", left: "50%",
+          position: "fixed", bottom: "calc(1.25rem + env(safe-area-inset-bottom, 0px))", left: "50%",
           transform: "translateX(-50%)",
           zIndex: 9999,
-          background: "rgba(21,72,76,0.82)",
-          color: "#FDF6EC",
+          background: "rgba(21,72,76,0.86)",
+          color: CREAM,
           border: "1px solid rgba(255,255,255,0.12)",
           borderRadius: "2rem",
-          padding: "0.5rem 1.35rem",
-          fontSize: "0.75rem",
+          padding: "0.6rem 1.35rem",
+          fontSize: "0.78rem",
           fontFamily: "'Plus Jakarta Sans', sans-serif",
-          letterSpacing: "0.05em",
+          fontWeight: 500,
+          letterSpacing: "0.04em",
           cursor: "pointer",
           backdropFilter: "blur(10px)",
-          opacity: p1 > 0.06 && p3LabelOpacity < 0.8 ? 1 : 0,
-          pointerEvents: p1 > 0.06 && p3LabelOpacity < 0.8 ? "auto" : "none",
+          WebkitBackdropFilter: "blur(10px)",
+          opacity: skipVisible ? 1 : 0,
+          pointerEvents: skipVisible ? "auto" : "none",
           transition: "opacity 0.4s ease",
           whiteSpace: "nowrap",
         }}
@@ -738,11 +812,9 @@ export default function App() {
       </button>
 
       {/* ── Phase 2: right-wall stripes + sinusoidal wave animation ── */}
-      <div ref={p2Ref} className="relative" style={{ height: "400vh" }}>
-        <div className="sticky top-0 w-screen h-screen overflow-hidden" style={{ background: "#FDF6EC" }}>
-          <svg viewBox={`0 0 ${VW} ${VH}`} preserveAspectRatio="none"
-            className="absolute inset-0 w-full h-full" overflow="hidden">
-
+      <div ref={p2Ref} className="relative" style={{ height: phaseH(400) }}>
+        <div className="stage" style={stageStyle}>
+          <svg {...svgProps}>
             {/* Continuity with Phase 1: at progress 0 the strands are full-height
                 verticals (matching Phase 1's last frame).  Stage 1 (p<δ): the tail
                 below the turn retracts upward - still ONE straight line.  Stage 2:
@@ -750,72 +822,71 @@ export default function App() {
                 each strand is a single unbroken line - never cut, never forked. */}
             {SECTIONS.map((s, i) => {
               const len   = p2Len[i];
-              const entry = P2_TURN_Y + 10;               // pre-drawn entry length
-              const tail  = VH + 10 - P2_TURN_Y;          // tail below the turn
-              const DELTA = 0.08;                         // scroll share for the pull-up
+              const entry = P2_TURN_Y + 10 + pad.y;        // pre-drawn entry length
+              const tail  = sceneBottom + 10 - P2_TURN_Y;  // tail below the turn
+              const DELTA = 0.08;                          // scroll share for the pull-up
               const pullP = Math.min(1, waveProgress / DELTA);
               const waveP = Math.max(0, (waveProgress - DELTA) / (1 - DELTA));
               return <g key={`wave-${s.id}`}>
-                <line x1={DX[i]} y1={P2_TURN_Y} x2={DX[i]} y2={VH + 10}
+                <line x1={DX[i]} y1={P2_TURN_Y} x2={DX[i]} y2={sceneBottom + 10}
                   stroke={s.color} strokeWidth={SW}
                   strokeDasharray={tail} strokeDashoffset={tail * pullP} />
                 <path ref={el => { p2Paths.current[i] = el; }}
-                  d={phase2Path(i)} stroke={s.color} strokeWidth={SW}
+                  d={phase2Path(i, pad)} stroke={s.color} strokeWidth={SW}
                   fill="none" strokeLinecap="round" strokeLinejoin="round"
                   strokeDasharray={len} strokeDashoffset={Math.max(0, (len - entry)*(1-waveP))} />
               </g>;
             })}
           </svg>
-          {/* at=-0.06 ⇒ already fully faded in at progress 0, so it's visible
+          {/* at=-0.03 ⇒ already fully faded in at progress 0, so it's visible
               from the moment the screen slides in (while the lines are still
               vertical), then fades as the wave takes over */}
-          <Caption p={p2} at={-0.03} fadeOut={0.1} x="90%" y="8%" rot={90}>breathe in</Caption>
-          <Caption p={p2} at={0.25} x="82%" y="22%" rot={-8}>and out</Caption>
-          <Caption p={p2} at={0.88} x="20%" y="55%" rot={90}>everyone deserves a break</Caption>
+          <Caption p={p2} at={-0.03} fadeOut={0.1} x="90%" y="8%" nx="86%" ny="4%" rot={90}>breathe in</Caption>
+          <Caption p={p2} at={0.25} x="82%" y="22%" nx="62%" ny="30%" rot={-8}>and out</Caption>
+          <Caption p={p2} at={0.88} x="20%" y="55%" nx="52%" ny="47%" rot={90}>everyone deserves a break</Caption>
         </div>
       </div>
+
       {/* ── Phase 2b: cursive petal flourish (coil scrolled away) ── */}
-      <div ref={p2bRef} className="relative" style={{ height: "300vh" }}>
-        <div className="sticky top-0 w-screen h-screen overflow-hidden" style={{ background: "#FDF6EC" }}>
-          <svg viewBox={`0 0 ${VW} ${VH}`} preserveAspectRatio="none"
-            className="absolute inset-0 w-full h-full" overflow="hidden">
+      <div ref={p2bRef} className="relative" style={{ height: phaseH(300) }}>
+        <div className="stage" style={stageStyle}>
+          <svg {...svgProps}>
             {/* Same continuity trick as Phase 2: full-height at progress 0, tail
                 pulls up first, THEN the flourish draws - one unbroken line. */}
             {SECTIONS.map((s, i) => {
               const len   = p2bLen[i];
               const yv    = P2B_CC + i * 22 - P2_QTR;  // turn y (matches phase2bPath)
-              const entry = yv + 10;                    // pre-drawn entry length
-              const tail  = VH + 10 - yv;
+              const entry = yv + 10 + pad.y;            // pre-drawn entry length
+              const tail  = sceneBottom + 10 - yv;
               const qx    = P2_LOOP_X[i];
               const DELTA = 0.08;                       // scroll share for the pull-up
               const pullP = Math.min(1, p2b / DELTA);
               const flowP = Math.max(0, (p2b - DELTA) / (1 - DELTA));
               return <g key={`flourish-${s.id}`}>
-                <line x1={qx} y1={yv} x2={qx} y2={VH + 10}
+                <line x1={qx} y1={yv} x2={qx} y2={sceneBottom + 10}
                   stroke={s.color} strokeWidth={SW}
                   strokeDasharray={tail} strokeDashoffset={tail * pullP} />
                 <path ref={el => { p2bPaths.current[i] = el; }}
-                  d={phase2bPath(i)} stroke={s.color} strokeWidth={SW}
+                  d={phase2bPath(i, pad)} stroke={s.color} strokeWidth={SW}
                   fill="none" strokeLinecap="round" strokeLinejoin="round"
                   strokeDasharray={len} strokeDashoffset={Math.max(0, (len - entry)*(1-flowP))} />
               </g>;
             })}
           </svg>
-          <Caption p={p2b} at={0.5} x="43%" y="26%" rot={34} size="clamp(1.3rem,2.8vw,2.4rem)">woah</Caption>
-          <Caption p={p2b} at={0.9} x="63%" y="64%" rot={90}>that was unexpected.</Caption>
+          <Caption p={p2b} at={0.5} x="43%" y="26%" nx="46%" ny="24%" rot={34} size="clamp(1.3rem,2.8vw,2.4rem)">woah</Caption>
+          <Caption p={p2b} at={0.9} x="63%" y="64%" nx="72%" ny="58%" rot={90}>that was unexpected.</Caption>
         </div>
       </div>
 
       {/* ── Phase 3: strands land → perspective floor → bars cast up → full-bleed columns ── */}
-      <div ref={p3Ref} className="relative" style={{ height: "300vh" }}>
-        <div className="sticky top-0 w-screen h-screen overflow-hidden" style={{ background: "#FDF6EC" }}>
-          <svg viewBox={`0 0 ${VW} ${VH}`} preserveAspectRatio="none"
-            className="absolute inset-0 w-full h-full" overflow="hidden">
+      <div ref={p3Ref} className="relative" style={{ height: phaseH(300) }}>
+        <div className="stage" style={stageStyle}>
+          <svg {...svgProps}>
             <defs>
               {/* perspective rays reveal - grows downward from the floor during stage 1 */}
               <clipPath id="ray-clip">
-                <rect x="0" y={FLOOR_Y} width={VW}
-                  height={Math.max(0, floorGrow * (VH - FLOOR_Y + 60))} />
+                <rect x={sceneLeft} y={FLOOR_Y} width={sceneW}
+                  height={Math.max(0, floorGrow * (sceneBottom - FLOOR_Y + 60))} />
               </clipPath>
             </defs>
 
@@ -823,20 +894,18 @@ export default function App() {
             <g opacity={floorOpacity}>
               {SECTIONS.map((s, i) => (
                 <line key={`p3-line-${s.id}`}
-                  x1={CONTACT_X[i]} y1={-10}
+                  x1={CONTACT_X[i]} y1={sceneTop - 10}
                   x2={CONTACT_X[i]} y2={FLOOR_Y}
                   stroke={s.color} strokeWidth={SW} strokeLinecap="round" />
               ))}
-              <line x1="0" y1={FLOOR_Y} x2={VW} y2={FLOOR_Y}
+              <line x1={sceneLeft} y1={FLOOR_Y} x2={sceneRight} y2={FLOOR_Y}
                 stroke="#d8cbb8" strokeWidth="1.5" />
               <g clipPath="url(#ray-clip)">
                 {SECTIONS.map((s, i) => {
                   const cx = CONTACT_X[i];
-                  const cl = (i * VW) / 5;
-                  const cr = ((i + 1) * VW) / 5;
                   return (
                     <path key={`ray-${s.id}`}
-                      d={`M ${cx - SW / 2},${FLOOR_Y} L ${cl},${VH} L ${cr},${VH} L ${cx + SW / 2},${FLOOR_Y} Z`}
+                      d={`M ${cx - SW / 2},${FLOOR_Y} L ${colLeft(i)},${sceneBottom} L ${colRight(i)},${sceneBottom} L ${cx + SW / 2},${FLOOR_Y} Z`}
                       fill={s.color} />
                   );
                 })}
@@ -845,45 +914,52 @@ export default function App() {
 
             {/* Stage 2: bars rise UP from the trapezoid's wide base (full column width) */}
             {SECTIONS.map((s, i) => {
-              const cl = (i * VW) / 5;
-              const cr = ((i + 1) * VW) / 5;
-              const top = VH * (1 - barRise); // VH → 0 (rises from the base upward)
+              const top = sceneBottom - sceneH * barRise; // bottom edge → top edge
               return (
                 <rect key={`col-${s.id}`}
-                  x={cl} y={top}
-                  width={cr - cl} height={VH - top}
+                  x={colLeft(i)} y={top}
+                  width={colRight(i) - colLeft(i)} height={sceneBottom - top}
                   fill={s.color} />
               );
             })}
           </svg>
-          <Caption p={p3} at={0.08} fadeOut={0.52} x="20%"  y="15%">hope you enjoyed the ride!</Caption>
-          <Caption p={p3} at={0.3}  fadeOut={0.52} x="65%" y="25%">now more about me…</Caption>
+          <Caption p={p3} at={0.08} fadeOut={0.52} x="20%"  y="15%" nx="8%" ny="12%">hope you enjoyed the ride!</Caption>
+          <Caption p={p3} at={0.3}  fadeOut={0.52} x="65%" y="25%" nx="30%" ny="20%">now more about me…</Caption>
 
-          {/* Interactive column layer - fades in with animation, handles expand/collapse */}
+          {/* Interactive column layer - fades in with animation, handles expand/collapse.
+              Desktop: five columns side by side. Phone: five bands stacked vertically. */}
           <div className="absolute inset-0 flex"
-            style={{ opacity: p3LabelOpacity, pointerEvents: p3LabelOpacity > 0 ? "auto" : "none" }}>
+            style={{
+              flexDirection: narrow ? "column" : "row",
+              opacity: p3LabelOpacity,
+              pointerEvents: portfolioLive ? "auto" : "none",
+            }}>
             {SECTIONS.map((s, i) => {
               const isActive    = activeSection === i;
               const isCollapsed = activeSection !== null && !isActive;
               const isHovered   = hoverSection === i && !isActive;
               const ink         = labelColor(s.color);
+              const flex        = isActive ? (narrow ? 7 : 5) : isCollapsed ? (narrow ? 0.42 : 0.28) : 1;
               return (
                 <div
                   key={`icol-${s.id}`}
-                  role={isActive ? undefined : "button"}
-                  tabIndex={0}
+                  role={isActive ? "region" : "button"}
+                  aria-label={isActive ? s.title : `open ${s.title}`}
+                  tabIndex={isActive ? -1 : 0}
                   aria-expanded={isActive}
-                  onClick={() => setActiveSection(isActive ? null : i)}
-                  onKeyDown={({ key, preventDefault }: { key: string; preventDefault(): void }) => {
-                    if (key === "Enter" || key === " ") {
-                      preventDefault();
-                      setActiveSection(isActive ? null : i);
+                  onClick={() => { if (!isActive) setActiveSection(i); }}
+                  onKeyDown={(e) => {
+                    if (isActive) return;
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setActiveSection(i);
                     }
                   }}
                   onMouseEnter={() => setHoverSection(i)}
                   onMouseLeave={() => setHoverSection(null)}
                   style={{
-                    flex: isActive ? 5 : isCollapsed ? 0.28 : 1,
+                    flex,
+                    minWidth: 0, minHeight: 0,
                     background: s.color,
                     overflow: "hidden",
                     cursor: isActive ? "default" : "pointer",
@@ -892,11 +968,11 @@ export default function App() {
                     alignItems: "center",
                     justifyContent: "center",
                     transition: "flex 0.48s cubic-bezier(0.4,0,0.2,1), filter 0.18s ease",
-                    filter: isHovered ? "brightness(1.12)" : "none",
+                    filter: isHovered ? "brightness(1.08)" : "none",
                     outline: "none",
                   }}
                 >
-                  {/* Label - big when default, rotated when collapsed */}
+                  {/* Label - big when default, small (rotated on desktop) when collapsed */}
                   <span style={{
                     fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 500,
                     letterSpacing: "-0.01em", textTransform: "lowercase",
@@ -904,9 +980,11 @@ export default function App() {
                     pointerEvents: "none",
                     position: "relative", zIndex: 1,
                     whiteSpace: "nowrap",
-                    fontSize: isCollapsed ? "clamp(0.6rem,1.1vw,0.85rem)" : "clamp(1.1rem,2.5vw,2.1rem)",
+                    fontSize: isCollapsed
+                      ? (narrow ? "0.78rem" : "clamp(0.6rem,1.1vw,0.85rem)")
+                      : (narrow ? "clamp(1.25rem,5.5vw,1.8rem)" : "clamp(1.1rem,2.5vw,2.1rem)"),
                     opacity: isActive ? 0 : 1,
-                    transform: isCollapsed ? "rotate(-90deg)" : "none",
+                    transform: isCollapsed && !narrow ? "rotate(-90deg)" : "none",
                     transition: "opacity 0.15s ease, transform 0.35s ease, font-size 0.35s ease",
                   }}>
                     {s.title}
@@ -914,11 +992,13 @@ export default function App() {
 
                   {/* Expand affordance - visible only in default (not active, not collapsed) state */}
                   {!isActive && !isCollapsed && (
-                    <div style={{
-                      position: "absolute", bottom: "1.15rem", left: "50%",
-                      transform: "translateX(-50%)",
+                    <div aria-hidden style={{
+                      position: "absolute",
+                      ...(narrow
+                        ? { right: "1.1rem", top: "50%", transform: "translateY(-50%) rotate(-90deg)" }
+                        : { bottom: "1.15rem", left: "50%", transform: "translateX(-50%)" }),
                       pointerEvents: "none",
-                      opacity: isHovered ? 0.85 : 0.4,
+                      opacity: isHovered ? 0.85 : 0.45,
                       transition: "opacity 0.18s ease",
                     }}>
                       <svg width="16" height="9" viewBox="0 0 16 9" fill="none">
@@ -930,38 +1010,67 @@ export default function App() {
 
                   {/* Expanded content - header + section component */}
                   <motion.div
+                    onClick={e => e.stopPropagation()}
                     style={{
                       position: "absolute", inset: 0,
-                      padding: "clamp(1.25rem,2.6vw,2.25rem)",
+                      padding: narrow
+                        ? "0.9rem 1rem calc(0.9rem + env(safe-area-inset-bottom, 0px))"
+                        : "clamp(1.25rem,2.6vw,2.25rem)",
                       pointerEvents: isActive ? "auto" : "none",
-                      display: "flex", flexDirection: "column", gap: "1rem",
+                      display: "flex", flexDirection: "column", gap: narrow ? "0.75rem" : "1rem",
                       color: ink, minHeight: 0,
                     }}
                     animate={{ opacity: isActive ? 1 : 0, y: isActive ? 0 : 10 }}
                     transition={{ duration: 0.26, delay: isActive ? 0.14 : 0, ease: [0.16, 1, 0.3, 1] }}
                   >
-                    {i !== 1 && (
-                      <div style={{
+                    {/* Panel header: title, contact, close */}
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexShrink: 0 }}>
+                      <h2 style={{
                         fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 600,
                         fontSize: "clamp(1.2rem,2.5vw,1.9rem)", letterSpacing: "-0.02em",
-                        lineHeight: 1.05, flexShrink: 0,
+                        lineHeight: 1.05, margin: 0, flex: 1, minWidth: 0, color: ink,
                       }}>
                         {s.title}
-                      </div>
-                    )}
+                      </h2>
+                      <a href={`mailto:${EMAIL}`} style={{
+                        fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 500,
+                        fontSize: "0.78rem", color: ink, opacity: 0.8, textDecoration: "none",
+                        whiteSpace: "nowrap",
+                      }}>
+                        {EMAIL}
+                      </a>
+                      <button
+                        type="button"
+                        data-close-section
+                        aria-label="close section"
+                        tabIndex={isActive ? 0 : -1}
+                        onClick={() => setActiveSection(null)}
+                        style={{
+                          width: 36, height: 36, borderRadius: "50%", flexShrink: 0,
+                          border: `1.5px solid ${rgba(ink, 0.35)}`, background: rgba(ink, 0.08),
+                          color: ink, cursor: "pointer", display: "grid", placeItems: "center",
+                          padding: 0, lineHeight: 1,
+                        }}
+                      >
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden>
+                          <path d="M1 1L11 11M11 1L1 11" stroke={ink} strokeWidth="1.8" strokeLinecap="round" />
+                        </svg>
+                      </button>
+                    </div>
 
-                    {i === 0
-                      ? <ExperienceSection items={SECTION_CONTENT[i].items} ink={ink} />
-                      : i === 1
-                      ? <ProjectsSection items={SECTION_CONTENT[i].items} ink={ink} title={s.title} />
-                      : i === 2
-                      ? <SchoolSection items={SECTION_CONTENT[i].items} ink={ink} />
-                      : i === 3
-                      ? <ExperienceSection items={SECTION_CONTENT[i].items} ink={ink} />
-                      : i === 4
-                      ? <HobbiesSection ink={ink} />
-                      : <PortfolioItems items={SECTION_CONTENT[i].items} ink={ink} />
-                    }
+                    {isActive && (
+                      i === 0
+                        ? <ExperienceSection items={SECTION_CONTENT[i].items} ink={ink} />
+                        : i === 1
+                        ? <ProjectsSection items={SECTION_CONTENT[i].items} ink={ink} />
+                        : i === 2
+                        ? <SchoolSection items={SECTION_CONTENT[i].items} ink={ink} />
+                        : i === 3
+                        ? <ExperienceSection items={SECTION_CONTENT[i].items} ink={ink} />
+                        : i === 4
+                        ? <HobbiesSection ink={ink} />
+                        : <PortfolioItems items={SECTION_CONTENT[i].items} ink={ink} />
+                    )}
                   </motion.div>
                 </div>
               );

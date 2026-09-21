@@ -2,6 +2,8 @@ import { useEffect, useRef } from "react";
 import { geoOrthographic, geoPath } from "d3-geo";
 import { feature } from "topojson-client";
 import type { Topology } from "topojson-specification";
+import { rgba } from "../lib/color";
+import { useNarrow } from "../hooks/useMediaQuery";
 
 // ── Static content ────────────────────────────────────────────────────────────
 
@@ -11,12 +13,8 @@ const BASKETBALL_ESSAY = [
   "Although my knee has restricted me from playing competitively, I have not given up the delight I get from basketball. I've come to think of it as the one place where I can express every part of myself, not to be seen, just to be felt.",
 ];
 
-// Placeholder pins - swap [lat, lon] for real destinations
-const TRAVEL_PINS: { name: string; lat: number; lon: number }[] = [
-  { name: "add a place →", lat: 40.7, lon: -74.0 },
-  { name: "add a place →", lat: 51.5, lon: -0.1 },
-  { name: "add a place →", lat: 28.6, lon: 77.2 },
-];
+// Places visited: add { name, lat, lon } entries and they render as pins on the globe.
+const TRAVEL_PINS: { name: string; lat: number; lon: number }[] = [];
 
 const READING: { title: string; author: string }[] = [
   { title: "Think: A Compelling Introduction to Philosophy", author: "Simon Blackburn" },
@@ -195,9 +193,10 @@ function Globe({ ink }: { ink: string }) {
 // ── Main section ──────────────────────────────────────────────────────────────
 
 export default function HobbiesSection({ ink }: { ink: string }) {
+  const narrow = useNarrow();
   return (
     <div
-      onClick={e => e.stopPropagation()}
+      className="section-scroll"
       style={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column", gap: "2rem" }}
     >
       {/* Basketball essay */}
@@ -237,13 +236,21 @@ export default function HobbiesSection({ ink }: { ink: string }) {
         </div>
       </div>
 
-      {/* Globe + sidebar */}
-      <div style={{ display: "flex", gap: "2rem", minHeight: "320px" }}>
+      {/* Globe + sidebar: side by side on desktop, stacked on phones */}
+      <div style={{
+        display: "flex", flexDirection: narrow ? "column" : "row",
+        gap: "2rem", minHeight: narrow ? undefined : "320px",
+      }}>
 
         {/* Globe */}
-        <div style={{ flex: 2, display: "flex", flexDirection: "column" }}>
+        <div style={{ flex: narrow ? "none" : 2, display: "flex", flexDirection: "column" }}>
           <ColLabel ink={ink}>travel · drag to explore</ColLabel>
-          <div style={{ flex: 1, borderRadius: "12px", overflow: "hidden", background: rgba(ink, 0.05), border: `1px solid ${rgba(ink, 0.15)}` }}>
+          <div style={{
+            flex: narrow ? "none" : 1,
+            height: narrow ? "min(85vw, 360px)" : undefined,
+            borderRadius: "12px", overflow: "hidden",
+            background: rgba(ink, 0.05), border: `1px solid ${rgba(ink, 0.15)}`,
+          }}>
             <Globe ink={ink} />
           </div>
         </div>
@@ -269,7 +276,11 @@ export default function HobbiesSection({ ink }: { ink: string }) {
 
           <div>
             <ColLabel ink={ink}>favorite albums</ColLabel>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem" }}>
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: narrow ? "1fr 1fr" : "1fr",
+              gap: "0.5rem 0.75rem",
+            }}>
               {ALBUMS.map((album, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.55rem" }}>
                   {album.cover ? (
@@ -311,10 +322,3 @@ function ColLabel({ ink, children }: { ink: string; children: string }) {
   );
 }
 
-function rgba(hex: string, a: number) {
-  const c = hex.replace("#", "");
-  const r = parseInt(c.slice(0, 2), 16);
-  const g = parseInt(c.slice(2, 4), 16);
-  const b = parseInt(c.slice(4, 6), 16);
-  return `rgba(${r},${g},${b},${a})`;
-}

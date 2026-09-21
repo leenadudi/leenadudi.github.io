@@ -1,10 +1,14 @@
 import { lazy, Suspense, useState } from "react";
 import { motion } from "motion/react";
-import { type Item, labelColor } from "../App";
+import type { Item } from "../App";
+import { labelColor, rgba } from "../lib/color";
+import { useNarrow } from "../hooks/useMediaQuery";
+import { MediaPane } from "./MediaPane";
 
 const VibeGraphEmbed = lazy(() => import("./VibeGraphEmbed"));
 
-export default function ProjectsSection({ items, ink, title }: { items: Item[]; ink: string; title?: string }) {
+export default function ProjectsSection({ items, ink }: { items: Item[]; ink: string }) {
+  const narrow = useNarrow();
   const [active, setActive] = useState(0);
   const item = items[active];
   const hasEmbed = item.media?.some(m => m.type === "embed");
@@ -13,21 +17,13 @@ export default function ProjectsSection({ items, ink, title }: { items: Item[]; 
   const hasVisual = hasEmbed || !!iframeMedia || !!pdfMedia;
 
   return (
-    <div onClick={e => e.stopPropagation()} style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", gap: "0.7rem" }}>
-      {/* Title + tab pills in one row */}
-      <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap", flexShrink: 0 }}>
-        {title && (
-          <span style={{
-            fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 600,
-            fontSize: "clamp(1.2rem,2.5vw,1.9rem)", letterSpacing: "-0.02em",
-            lineHeight: 1.05, color: ink,
-          }}>{title}</span>
-        )}
-        <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
+    <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", gap: "0.8rem" }}>
+      {/* Project tabs */}
+      <div role="tablist" aria-label="projects" style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap", flexShrink: 0 }}>
         {items.map((it, i) => (
-          <button key={i} onClick={() => setActive(i)} style={{
-            padding: "6px 16px", borderRadius: "99px", cursor: "pointer",
-            fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "0.78rem", fontWeight: 700,
+          <button key={i} role="tab" aria-selected={i === active} onClick={() => setActive(i)} style={{
+            padding: "6px 15px", borderRadius: "99px", cursor: "pointer",
+            fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: "clamp(0.74rem,1.25vw,0.8rem)", fontWeight: 700,
             letterSpacing: "-0.01em",
             position: "relative",
             background: "transparent",
@@ -46,16 +42,29 @@ export default function ProjectsSection({ items, ink, title }: { items: Item[]; 
             <span style={{ position: "relative", zIndex: 1 }}>{it.title}</span>
           </button>
         ))}
-        </div>
       </div>
 
-      {/* Content */}
-      <div style={{ flex: 1, minHeight: 0, display: "flex", gap: "0.7rem", overflow: "hidden" }}>
-        {/* Text - 25% when visual present, full width otherwise */}
-        <div style={{ width: hasVisual ? "25%" : "100%", flexShrink: 0, overflowY: "auto", display: "flex", flexDirection: "column", justifyContent: hasVisual ? "center" : "flex-start" }}>
-          <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.3rem" }}>
+      {/* Content: text beside the visual on desktop, stacked on phones */}
+      <div className="section-scroll" style={{
+        flex: 1, minHeight: 0,
+        display: "flex", flexDirection: narrow ? "column" : "row", gap: "0.8rem",
+        overflowY: narrow ? "auto" : "hidden",
+      }}>
+        <div className={narrow ? undefined : "section-scroll"} style={{
+          width: hasVisual && !narrow ? "clamp(240px, 28%, 420px)" : "100%",
+          flexShrink: 0,
+          overflowY: narrow ? "visible" : "auto",
+          display: "flex", flexDirection: "column",
+          justifyContent: hasVisual && !narrow ? "center" : "flex-start",
+        }}>
+          {item.meta && (
+            <div style={{ fontSize: "clamp(0.74rem,1.2vw,0.84rem)", color: ink, opacity: 0.72, fontStyle: "italic", marginBottom: "0.4rem" }}>
+              {item.meta}
+            </div>
+          )}
+          <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.35rem" }}>
             {item.bullets.map((b, j) => (
-              <li key={j} style={{ fontSize: "clamp(0.88rem,1.55vw,1rem)", lineHeight: 1.55, color: ink, opacity: 1 }}>
+              <li key={j} style={{ fontSize: "clamp(0.88rem,1.55vw,1rem)", lineHeight: 1.55, color: ink }}>
                 {b}
               </li>
             ))}
@@ -63,64 +72,26 @@ export default function ProjectsSection({ items, ink, title }: { items: Item[]; 
           {item.skills && (
             <div style={{ marginTop: "0.6rem", display: "flex", flexWrap: "wrap", gap: "0.3rem" }}>
               {item.skills.map((s, j) => (
-                <span key={j} style={{ padding: "3px 9px", borderRadius: "99px", fontSize: "0.76rem", fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 500, color: ink, background: rgba(ink, 0.1), border: `1px solid ${rgba(ink, 0.16)}` }}>{s}</span>
+                <span key={j} style={{ padding: "3px 10px", borderRadius: "99px", fontSize: "0.74rem", fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 500, color: ink, background: rgba(ink, 0.1), border: `1px solid ${rgba(ink, 0.16)}` }}>{s}</span>
               ))}
             </div>
           )}
         </div>
 
-        {/* Visual - 75% */}
         {hasEmbed && (
-          <div style={{ flex: 1, minWidth: 0, borderRadius: "8px", overflow: "hidden" }}>
-            <Suspense fallback={<div style={{ width:"100%",height:"100%",background:rgba(ink,0.08),borderRadius:"8px" }} />}>
+          <div style={{
+            flex: narrow ? "none" : 1, minWidth: 0,
+            height: narrow ? "min(70vh, 520px)" : "auto",
+            borderRadius: "10px", overflow: "hidden",
+          }}>
+            <Suspense fallback={<div style={{ width:"100%",height:"100%",background:rgba(ink,0.08),borderRadius:"10px" }} />}>
               <VibeGraphEmbed />
             </Suspense>
           </div>
         )}
-        {iframeMedia && (
-          <div style={{ flex: 1, minWidth: 0, borderRadius: "8px", overflow: "hidden", background: rgba(ink, 0.06), display: "flex", flexDirection: "column" }}>
-            <div style={{ padding: "0.4rem 0.6rem", display: "flex", justifyContent: "flex-end", borderBottom: `1px solid ${rgba(ink, 0.1)}`, flexShrink: 0 }}>
-              <a href={iframeMedia.url} target="_blank" rel="noreferrer" style={{ fontSize: "0.65rem", color: ink, opacity: 0.78, textDecoration: "none", fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 500 }}>
-                open ↗
-              </a>
-            </div>
-            <iframe
-              src={iframeMedia.url}
-              style={{ flex: 1, width: "100%", border: "none", display: "block" }}
-              sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation allow-downloads"
-              title="project embed"
-            />
-          </div>
-        )}
-        {pdfMedia && (
-          <div style={{ flex: 1, minWidth: 0, borderRadius: "8px", overflow: "hidden", background: rgba(ink, 0.04), position: "relative", display: "flex", flexDirection: "column" }}>
-            <div style={{ padding: "0.4rem 0.6rem", display: "flex", justifyContent: "flex-end", borderBottom: `1px solid ${rgba(ink, 0.1)}` }}>
-              <a href={pdfMedia.url} target="_blank" rel="noreferrer" style={{ fontSize: "0.65rem", color: ink, opacity: 0.78, textDecoration: "none", fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 500 }}>
-                open ↗
-              </a>
-            </div>
-            <object
-              data={pdfMedia.url}
-              type="application/pdf"
-              style={{ flex: 1, width: "100%", border: "none", display: "block" }}
-            >
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", opacity: 0.4, fontSize: "0.8rem", color: ink }}>
-                PDF preview unavailable -{" "}
-                <a href={pdfMedia.url} target="_blank" rel="noreferrer" style={{ color: ink, marginLeft: "0.3em" }}>open directly</a>
-              </div>
-            </object>
-          </div>
-        )}
+        {iframeMedia && <MediaPane kind="iframe" url={iframeMedia.url} label={iframeMedia.label ?? "project"} ink={ink} narrow={narrow} />}
+        {pdfMedia && <MediaPane kind="pdf" url={pdfMedia.url} label={pdfMedia.label ?? "paper"} ink={ink} narrow={narrow} />}
       </div>
     </div>
   );
-}
-
-
-function rgba(hex: string, a: number) {
-  const c = hex.replace("#", "");
-  const r = parseInt(c.slice(0, 2), 16);
-  const g = parseInt(c.slice(2, 4), 16);
-  const b = parseInt(c.slice(4, 6), 16);
-  return `rgba(${r},${g},${b},${a})`;
 }

@@ -1,2 +1,24 @@
-* { scrollbar-width: none; cursor: none !important; user-select: none; -webkit-user-select: none; }
+/* Custom cursor only where there is a real pointer; touch devices keep native behaviour. */
+@media (hover: hover) and (pointer: fine) {
+  * { cursor: none !important; }
+}
+
+* { scrollbar-width: none; user-select: none; -webkit-user-select: none; }
 *::-webkit-scrollbar { display: none; }
+
+html { -webkit-text-size-adjust: 100%; }
+a, button { -webkit-tap-highlight-color: transparent; }
+
+/* Scrollable panel bodies: don't let a swipe at the edge bubble up and scroll the page. */
+.section-scroll {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
