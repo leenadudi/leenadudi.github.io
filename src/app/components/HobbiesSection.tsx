@@ -4,6 +4,7 @@ import { feature } from "topojson-client";
 import type { Topology } from "topojson-specification";
 import { rgba } from "../lib/color";
 import { useNarrow } from "../hooks/useMediaQuery";
+import { CARD, FONT_BODY, INK, LINE, MUTED, RADIUS } from "../lib/tokens";
 
 // ── Static content ────────────────────────────────────────────────────────────
 
@@ -192,133 +193,83 @@ function Globe({ ink }: { ink: string }) {
 
 // ── Main section ──────────────────────────────────────────────────────────────
 
-export default function HobbiesSection({ ink }: { ink: string }) {
+export default function HobbiesSection({ color }: { color: string }) {
   const narrow = useNarrow();
+  const ink = INK;
+  const box: React.CSSProperties = {
+    background: CARD, border: `1px solid ${LINE}`, borderRadius: RADIUS, padding: "1.25rem 1.4rem",
+    display: "flex", flexDirection: "column", minWidth: 0,
+  };
   return (
-    <div
-      className="section-scroll"
-      style={{ flex: 1, minHeight: 0, overflowY: "auto", display: "flex", flexDirection: "column", gap: "2rem" }}
-    >
+    <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1.2fr 1fr", gap: "1rem" }}>
+
       {/* Basketball essay */}
-      <div>
-        <ColLabel ink={ink}>basketball</ColLabel>
-        <div style={{
-          fontFamily: "'Plus Jakarta Sans', sans-serif",
-          fontStyle: "italic",
-          fontSize: "clamp(1.05rem,2vw,1.3rem)",
-          fontWeight: 600,
-          letterSpacing: "-0.02em",
-          lineHeight: 1.2,
-          color: ink,
-          opacity: 0.9,
-          marginBottom: "0.75rem",
-        }}>
-          a few words about basketball
-        </div>
-        <div style={{
-          borderLeft: `2.5px solid ${rgba(ink, 0.35)}`,
-          paddingLeft: "1.1rem",
-          display: "flex", flexDirection: "column", gap: "0.85rem",
-        }}>
+      <div style={{ ...box, borderTop: `3px solid ${color}` }}>
+        <Label>basketball</Label>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
           {BASKETBALL_ESSAY.map((para, i) => (
-            <p key={i} style={{
-              margin: 0,
-              fontFamily: "'Plus Jakarta Sans', sans-serif",
-              fontStyle: "italic",
-              fontSize: "clamp(0.88rem,1.55vw,1rem)",
-              lineHeight: 1.75,
-              color: ink,
-              opacity: 1,
-            }}>
+            <p key={i} style={{ margin: 0, fontFamily: FONT_BODY, fontSize: "0.92rem", lineHeight: 1.7, color: ink }}>
               {para}
             </p>
           ))}
         </div>
       </div>
 
-      {/* Globe + sidebar: side by side on desktop, stacked on phones */}
-      <div style={{
-        display: "flex", flexDirection: narrow ? "column" : "row",
-        gap: "2rem", minHeight: narrow ? undefined : "320px",
-      }}>
-
-        {/* Globe */}
-        <div style={{ flex: narrow ? "none" : 2, display: "flex", flexDirection: "column" }}>
-          <ColLabel ink={ink}>travel · drag to explore</ColLabel>
-          <div style={{
-            flex: narrow ? "none" : 1,
-            height: narrow ? "min(85vw, 360px)" : undefined,
-            borderRadius: "12px", overflow: "hidden",
-            background: rgba(ink, 0.05), border: `1px solid ${rgba(ink, 0.15)}`,
-          }}>
-            <Globe ink={ink} />
-          </div>
+      {/* Globe */}
+      <div style={{ ...box, minHeight: narrow ? undefined : 320 }}>
+        <Label>travel · drag to explore</Label>
+        <div style={{
+          flex: narrow ? "none" : 1,
+          height: narrow ? "min(80vw, 340px)" : undefined,
+          borderRadius: 10, overflow: "hidden", background: rgba(ink, 0.04), border: `1px solid ${LINE}`,
+        }}>
+          <Globe ink={ink} />
         </div>
+      </div>
 
-        {/* Reading + Albums */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "1.8rem" }}>
-
-          <div>
-            <ColLabel ink={ink}>currently reading</ColLabel>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.7rem" }}>
-              {READING.map((book, i) => (
-                <div key={i}>
-                  <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 600, fontStyle: "italic", fontSize: "clamp(0.84rem,1.45vw,0.96rem)", color: ink, lineHeight: 1.3 }}>
-                    {book.title}
-                  </div>
-                  <div style={{ fontSize: "clamp(0.74rem,1.25vw,0.84rem)", color: ink, marginTop: "0.15rem" }}>
-                    {book.author}
-                  </div>
-                </div>
-              ))}
+      {/* Reading */}
+      <div style={box}>
+        <Label>currently reading</Label>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.7rem" }}>
+          {READING.map((book, i) => (
+            <div key={i}>
+              <div style={{ fontFamily: FONT_BODY, fontWeight: 600, fontSize: "0.92rem", color: ink, lineHeight: 1.35 }}>{book.title}</div>
+              <div style={{ fontFamily: FONT_BODY, fontSize: "0.82rem", color: MUTED, marginTop: "0.1rem" }}>{book.author}</div>
             </div>
-          </div>
+          ))}
+        </div>
+      </div>
 
-          <div>
-            <ColLabel ink={ink}>favorite albums</ColLabel>
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: narrow ? "1fr 1fr" : "1fr",
-              gap: "0.5rem 0.75rem",
-            }}>
-              {ALBUMS.map((album, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.55rem" }}>
-                  {album.cover ? (
-                    <img src={album.cover} alt={album.title}
-                      style={{ width: "32px", height: "32px", borderRadius: "4px", objectFit: "cover", flexShrink: 0, opacity: 0.92 }} />
-                  ) : (
-                    <div style={{ width: "32px", height: "32px", borderRadius: "4px", flexShrink: 0, background: rgba(ink, 0.15) }} />
-                  )}
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 600, fontStyle: "italic", fontSize: "clamp(0.78rem,1.35vw,0.9rem)", color: ink, lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {album.title}
-                    </div>
-                    <div style={{ fontSize: "clamp(0.68rem,1.1vw,0.76rem)", color: ink, opacity: 0.65, lineHeight: 1.2 }}>
-                      {album.artist}
-                    </div>
-                  </div>
+      {/* Albums */}
+      <div style={box}>
+        <Label>favorite albums</Label>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.55rem 0.9rem" }}>
+          {ALBUMS.map((album, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.55rem", minWidth: 0 }}>
+              {album.cover ? (
+                <img src={album.cover} alt="" loading="lazy"
+                  style={{ width: 34, height: 34, borderRadius: 5, objectFit: "cover", flexShrink: 0 }} />
+              ) : (
+                <div style={{ width: 34, height: 34, borderRadius: 5, flexShrink: 0, background: rgba(ink, 0.1) }} />
+              )}
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontFamily: FONT_BODY, fontWeight: 600, fontSize: "0.82rem", color: ink, lineHeight: 1.25, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {album.title}
                 </div>
-              ))}
+                <div style={{ fontFamily: FONT_BODY, fontSize: "0.74rem", color: MUTED, lineHeight: 1.25 }}>{album.artist}</div>
+              </div>
             </div>
-          </div>
-
+          ))}
         </div>
       </div>
     </div>
   );
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-function ColLabel({ ink, children }: { ink: string; children: string }) {
+function Label({ children }: { children: string }) {
   return (
-    <div style={{
-      fontSize: "0.65rem", fontFamily: "'Plus Jakarta Sans',sans-serif",
-      fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase",
-      color: ink, opacity: 0.9, marginBottom: "0.6rem",
-    }}>
+    <div style={{ fontFamily: FONT_BODY, fontWeight: 600, fontSize: "0.8rem", color: MUTED, marginBottom: "0.6rem" }}>
       {children}
     </div>
   );
 }
-

@@ -1,13 +1,14 @@
-/* Custom cursor only where there is a real pointer; touch devices keep native behaviour. */
-@media (hover: hover) and (pointer: fine) {
-  * { cursor: none !important; }
-}
-
-* { scrollbar-width: none; user-select: none; -webkit-user-select: none; }
-*::-webkit-scrollbar { display: none; }
-
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 a, button { -webkit-tap-highlight-color: transparent; }
+img { max-width: 100%; }
+
+/* The ride (#ride, desktop only) keeps its custom cursor and paint-on-drag feel. */
+@media (hover: hover) and (pointer: fine) {
+  .ride-mode * { cursor: none !important; }
+}
+.ride-mode * { scrollbar-width: none; user-select: none; -webkit-user-select: none; }
+.ride-mode *::-webkit-scrollbar { display: none; }
+.ride-col:hover, .ride-col:focus-visible { filter: brightness(1.08); }
 
 /* Scrollable panel bodies: don't let a swipe at the edge bubble up and scroll the page. */
 .section-scroll {
@@ -15,7 +16,10 @@ a, button { -webkit-tap-highlight-color: transparent; }
   -webkit-overflow-scrolling: touch;
 }
 
+:focus-visible { outline: 2px solid rgba(26,18,8,0.5); outline-offset: 2px; }
+
 @media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
