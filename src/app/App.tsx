@@ -5,7 +5,7 @@ import ExperienceSection from "./components/ExperienceSection";
 import ProjectsSection from "./components/ProjectsSection";
 import SchoolSection from "./components/SchoolSection";
 import HobbiesSection from "./components/HobbiesSection";
-import { useFinePointer, useNarrow, useViewport } from "./hooks/useMediaQuery";
+import { useFinePointer, useNarrow, useStageSize } from "./hooks/useMediaQuery";
 import { labelColor, rgba } from "./lib/color";
 
 export { labelColor };
@@ -568,17 +568,18 @@ function Cursor() {
 /** Narrator text that fades in at `at` (and out at `fadeOut`) as the phase's
  *  scroll progress `p` advances. Position in % of the screen; `nx`/`ny` override
  *  the position on phones. */
-function Caption({ p, at, fadeOut, x, y, nx, ny, rot = 0, size = "clamp(1.05rem,2.4vw,2rem)", children }: {
+function Caption({ p, at, fadeOut, x, y, nx, ny, nrot, rot = 0, size = "clamp(1.05rem,2.4vw,2rem)", children }: {
   p: number; at: number; fadeOut?: number; x: string; y: string; nx?: string; ny?: string;
-  rot?: number; size?: string; children: React.ReactNode;
+  nrot?: number; rot?: number; size?: string; children: React.ReactNode;
 }) {
   const narrow = useNarrow();
+  const angle = narrow && nrot !== undefined ? nrot : rot;
   const on  = easeC((p - at) / 0.06);
   const off = fadeOut === undefined ? 1 : 1 - easeC((p - fadeOut) / 0.06);
   return (
     <div className="absolute z-30 pointer-events-none" aria-hidden style={{
       left: narrow && nx ? nx : x, top: narrow && ny ? ny : y, opacity: on * off,
-      transform: `translateY(${(1 - on) * 16}px) rotate(${rot}deg)`,
+      transform: `translateY(${(1 - on) * 16}px) rotate(${angle}deg)`,
       transformOrigin: "left top",
       fontFamily: "'Poppins',sans-serif", fontStyle: "italic", fontWeight: 400,
       fontSize: size, color: "#000000", letterSpacing: "-0.01em", whiteSpace: "nowrap",
@@ -597,7 +598,8 @@ const stageStyle: React.CSSProperties = {
 export default function App() {
   const narrow = useNarrow();
   const finePointer = useFinePointer();
-  const { w: vw, h: vh } = useViewport();
+  const stageRef = useRef<HTMLDivElement>(null);
+  const { w: vw, h: vh } = useStageSize(stageRef);
   const pad = useMemo(() => scenePad(vw, vh), [vw, vh]);
 
   // Shorter ride on phones: a flick scrolls a lot, so fewer screens per phase.
@@ -616,7 +618,11 @@ export default function App() {
   const p3Ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress: sp3 } = useScroll({ target: p3Ref, offset: ["start start","end end"] });
   const [p3, setP3] = useState(0);
-  useLayoutEffect(() => sp3.on("change", setP3), [sp3]);
+  useLayoutEffect(() => sp3.on("change", (v) => {
+    const doc = document.documentElement;
+    const atBottom = window.scrollY + window.innerHeight >= doc.scrollHeight - 2;
+    setP3(atBottom ? 1 : v);
+  }), [sp3]);
 
   // Phase 2
   const p2Ref   = useRef<HTMLDivElement>(null);
@@ -679,8 +685,9 @@ export default function App() {
   // Phase 3 - stage 1 (0→0.5): strands land + perspective floor grows.
   //           stage 2 (0.5→1): bars cast UP from floor, then widen to full-bleed; floor fades.
   const ease3 = (t: number) => { const c = Math.max(0, Math.min(1, t)); return c * c * (3 - 2 * c); };
-  const p3s1 = Math.min(1, p3 / 0.5);
-  const p3s2 = Math.max(0, (p3 - 0.5) / 0.5);
+  const p3e  = Math.min(1, p3 / 0.88);            // finish early; the tail is a safety buffer
+  const p3s1 = Math.min(1, p3e / 0.5);
+  const p3s2 = Math.max(0, (p3e - 0.5) / 0.5);
   const floorGrow      = ease3(p3s1);                 // ray-clip reveal, stage 1
   const barRise        = ease3(p3s2);                 // bar top: bottom edge → top edge
   const floorOpacity   = 1 - ease3(p3s2);             // floor fades as bars rise
@@ -714,7 +721,7 @@ export default function App() {
 
       {/* ── Phase 1: name + loop tower + wave + descent ── */}
       <div ref={p1Ref} className="relative" style={{ height: phaseH(500) }}>
-        <div className="stage" style={stageStyle}>
+        <div ref={stageRef} className="stage" style={stageStyle}>
           <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none"
             style={{ opacity: nameOpacity, padding: "0 1.25rem", textAlign: "center" }}>
             <h1 style={{ fontFamily:"'Poppins',sans-serif", fontStyle:"italic", fontWeight:200,
@@ -843,7 +850,7 @@ export default function App() {
               vertical), then fades as the wave takes over */}
           <Caption p={p2} at={-0.03} fadeOut={0.1} x="90%" y="8%" nx="86%" ny="4%" rot={90}>breathe in</Caption>
           <Caption p={p2} at={0.25} x="82%" y="22%" nx="62%" ny="30%" rot={-8}>and out</Caption>
-          <Caption p={p2} at={0.88} x="20%" y="55%" nx="52%" ny="47%" rot={90}>everyone deserves a break</Caption>
+          <Caption p={p2} at={0.88} x="20%" y="55%" nx="22%" ny="64%" rot={90} nrot={0}>everyone deserves a break</Caption>
         </div>
       </div>
 
@@ -923,8 +930,8 @@ export default function App() {
               );
             })}
           </svg>
-          <Caption p={p3} at={0.08} fadeOut={0.52} x="20%"  y="15%" nx="8%" ny="12%">hope you enjoyed the ride!</Caption>
-          <Caption p={p3} at={0.3}  fadeOut={0.52} x="65%" y="25%" nx="30%" ny="20%">now more about me…</Caption>
+          <Caption p={p3e} at={0.08} fadeOut={0.52} x="20%"  y="15%" nx="8%" ny="12%">hope you enjoyed the ride!</Caption>
+          <Caption p={p3e} at={0.3}  fadeOut={0.52} x="65%" y="25%" nx="30%" ny="20%">now more about me…</Caption>
 
           {/* Interactive column layer - fades in with animation, handles expand/collapse.
               Desktop: five columns side by side. Phone: five bands stacked vertically. */}
