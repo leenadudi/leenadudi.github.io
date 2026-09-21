@@ -1,20 +1,11 @@
-/** One page per section: title, that page's ribbon move, then the content. */
+/** One page per section. */
 import { Navigate, useParams } from "react-router";
 import { SECTIONS, SECTION_CONTENT } from "../content";
 import { Container, PageTitle } from "../components/Layout";
-import Ribbon from "../components/Ribbon";
 import EntryList from "../components/EntryList";
 import ProjectList from "../components/ProjectList";
 import SchoolPage from "../components/SchoolPage";
 import HobbiesSection from "../components/HobbiesSection";
-
-const LEDE: Record<string, string> = {
-  experience: "Internships in software engineering, climate data research, and financial analysis.",
-  projects:   "Things I built because I wanted them to exist.",
-  school:     "MIT, and the research and design challenges I have worked on there.",
-  service:    "Tutoring, STEM outreach, and the organizations I have helped run.",
-  hobbies:    "Off the clock.",
-};
 
 export default function SectionPage() {
   const { section } = useParams();
@@ -25,11 +16,8 @@ export default function SectionPage() {
 
   return (
     <>
-      <PageTitle title={s.title} lede={LEDE[s.id]} />
-      <div style={{ margin: "0.5rem 0 clamp(1.5rem, 4vw, 3rem)" }}>
-        <Ribbon move={s.move} emphasis={s.id} />
-      </div>
-      <Container>
+      <PageTitle title={s.title} />
+      <Container style={{ paddingTop: "clamp(2rem, 4vw, 3.5rem)" }}>
         {s.id === "experience" || s.id === "service" ? (
           <EntryList items={items} color={s.color} />
         ) : s.id === "projects" ? (

@@ -31,7 +31,7 @@ function Project({ item, color, narrow, first, liveOpen, onToggleLive }: {
     m.type === "link" || m.type === "paper" || m.type === "pdf");
 
   return (
-    <section style={{ padding: narrow ? "1.6rem 0" : "2.4rem 0", borderTop: first ? "none" : `1px solid ${LINE}` }}>
+    <section data-rb={first ? undefined : "cross"} style={{ padding: narrow ? "2.4rem 0" : "3.4rem 0" }}>
       <div style={{
         display: "grid",
         gridTemplateColumns: narrow || !item.image ? "1fr" : "minmax(0, 0.9fr) minmax(0, 1.1fr)",
@@ -53,12 +53,9 @@ function Project({ item, color, narrow, first, liveOpen, onToggleLive }: {
             </h2>
             {item.meta && <span style={{ fontFamily: FONT_BODY, fontSize: "0.85rem", color: MUTED }}>{item.meta}</span>}
           </div>
-          {item.summary && (
-            <p style={{ margin: "0.6rem 0 0.9rem", fontFamily: FONT_BODY, fontSize: "0.98rem", lineHeight: 1.6, color: INK, maxWidth: "60ch" }}>
-              {item.summary}
-            </p>
-          )}
-          <Bullets items={item.bullets} color={color} size="0.88rem" />
+          <div style={{ marginTop: "0.9rem" }}>
+            <Bullets items={item.bullets} color={color} size="0.9rem" />
+          </div>
           {item.skills && (
             <div style={{ marginTop: "1rem", display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
               {item.skills.map((s, j) => <Chip key={j} color={color}>{s}</Chip>)}

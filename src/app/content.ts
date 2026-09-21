@@ -5,16 +5,11 @@ export const GITHUB   = "https://github.com/leenadudi";
 export const LINKEDIN = "https://linkedin.com/in/leenadudi";
 
 export const SECTIONS = [
-  { id: "experience", title: "experience", color: "#34C8C5", move: "loop",
-    teaser: "Agent Vista, Bungii, NASA, Kiewit" },
-  { id: "projects",   title: "projects",   color: "#DF84BD", move: "wave",
-    teaser: "clerkflow, leena's music brain, wyrather, llrise" },
-  { id: "school",     title: "school",     color: "#FC8A8E", move: "braid",
-    teaser: "MIT, FIFA and the Sports Lab, the Urban Risk Lab, Momentum" },
-  { id: "service",    title: "service",    color: "#FFAE69", move: "coil",
-    teaser: "tutoring, Million Girls Moonshot, Heartland STEM, FIRST, BPA" },
-  { id: "hobbies",    title: "hobbies",    color: "#FEE09D", move: "loop",
-    teaser: "basketball, travel, reading, music" },
+  { id: "experience", title: "experience", color: "#34C8C5" },
+  { id: "projects",   title: "projects",   color: "#DF84BD" },
+  { id: "school",     title: "school",     color: "#FC8A8E" },
+  { id: "service",    title: "service",    color: "#FFAE69" },
+  { id: "hobbies",    title: "hobbies",    color: "#FEE09D" },
 ] as const;
 export type SectionId = (typeof SECTIONS)[number]["id"];
 
@@ -43,7 +38,6 @@ export type Award    = { name: string; description?: string };
 export type Item = {
   title: string;
   meta?: string;      // date · place
-  summary?: string;   // one-line description shown on cards
   image?: string;     // screenshot under /media (projects)
   bullets: string[];  // visible description
   art: string;        // ItemVisual art id
@@ -93,7 +87,6 @@ export const SECTION_CONTENT: { items: Item[] }[] = [
   { items: [
 
       { title: "clerkflow", meta: "2025", art: "civic", image: "/media/clerkflow.jpg",
-        summary: "Turns a city's raw council records into a searchable knowledge graph, so a clerk can answer \"did we already authorize this?\" in seconds instead of a weekend.",
         bullets: [
           "A clerk shouldn't have to spend a weekend digging through PDFs to answer \"did we already authorize this?\" Clerkflow reads a city's raw records and builds a structured understanding of how that government actually works: people, departments, resolutions, vendors, grants, and votes assembled into a searchable knowledge graph.",
           "Ingests municipal PDFs through an agentic profiler: Claude Haiku classifies document type and extracts structured metadata before routing to the pipeline; Tesseract OCR + Claude Vision handle scanned and complex layouts",
@@ -102,7 +95,6 @@ export const SECTION_CONTENT: { items: Item[] }[] = [
         skills: ["Python", "Flask", "Claude", "pgvector", "Neo4j", "PostgreSQL"],
         media: [{ type: "iframe", url: "https://council-knowledge-base.vercel.app/" }] },
       { title: "leena's music brain", meta: "2025", art: "vibegraph", image: "/media/musicbrain.jpg",
-        summary: "Five years of Spotify history mapped by audio similarity: an interactive map of ~2,000 tracks with a vibe compass and nearest-neighbour radar.",
         bullets: [
           "Pulled five years of Spotify streaming history and enriched ~2,000 tracks with nine audio features (ReccoBeats API), cached in SQLite",
           "Maps the whole library with seeded UMAP so on-screen distance means real audio similarity, coloured along a continuous calm→hype spectrum (PCA)",
@@ -111,7 +103,6 @@ export const SECTION_CONTENT: { items: Item[] }[] = [
         skills: ["TypeScript", "React", "SQLite", "UMAP", "PCA", "Louvain", "Canvas 2D"],
         media: [{ type: "embed", kind: "vibegraph" }] },
       { title: "wyrather", meta: "2025", art: "route",
-        summary: "Daily would-you-rather polls with live head-to-head debates, built on Next.js server actions and Postgres row-level security.",
         bullets: [
           "Daily \"would you rather\" polls with real-time head-to-head debates, where users vote, see live split counts, then enter a matchmaking queue to argue against someone who voted the opposite way",
           "All write paths run through Next.js server actions with Zod validation; Postgres Row-Level Security enforces a fully read-only browser client, with no direct table access from the frontend",
@@ -121,7 +112,6 @@ export const SECTION_CONTENT: { items: Item[] }[] = [
         skills: ["Next.js", "TypeScript", "Supabase", "PostgreSQL", "Row-Level Security"],
         media: [{ type: "iframe", url: "https://wyrather.me/" }] },
       { title: "llrise", meta: "MIT Lincoln Laboratory · July 2024", art: "radar", image: "/media/llrise.jpg",
-        summary: "Built a working Doppler and synthetic-aperture radar from scratch in two weeks, as one of 26 students selected nationally.",
         bullets: [
           "1 of 26 students selected nationally for the residential LLRISE (Lincoln Laboratory Radar Introduction for Student Engineers) program",
           "Built a complete radar system from scratch over 2 weeks: Doppler radar to measure velocity and Synthetic Aperture Radar (SAR) for 2D image reconstruction",

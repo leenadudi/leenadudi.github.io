@@ -1,11 +1,11 @@
 /** Shared page chrome: sticky nav, content column, footer with the line band. */
-import { useEffect, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router";
 import { EMAIL, GITHUB, LINKEDIN, SECTIONS } from "../content";
 import { useNarrow } from "../hooks/useMediaQuery";
 import { rgba } from "../lib/color";
 import { CONTAINER, CREAM, FONT_BODY, FONT_DISPLAY, GUTTER, INK, LINE, MUTED } from "../lib/tokens";
-import { LineBand } from "./Ribbon";
+import PageRibbon, { LineBand } from "./PageRibbon";
 
 export function Container({ children, style }: { children: ReactNode; style?: CSSProperties }) {
   return (
@@ -18,12 +18,17 @@ export function Container({ children, style }: { children: ReactNode; style?: CS
 /** Root layout for every route except the ride. */
 export default function Layout() {
   const { pathname } = useLocation();
+  const narrow = useNarrow();
+  const mainRef = useRef<HTMLElement>(null);
   useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
   return (
     <div style={{ background: CREAM, color: INK, minHeight: "100dvh", fontFamily: FONT_BODY, display: "flex", flexDirection: "column" }}>
       <Nav />
-      <main style={{ flex: 1 }}>
-        <Outlet />
+      <main ref={mainRef} style={{ flex: 1, position: "relative", overflow: "hidden", paddingBottom: "clamp(3rem, 7vw, 5.5rem)" }}>
+        <PageRibbon key={pathname} mainRef={mainRef} narrow={narrow} />
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <Outlet />
+        </div>
       </main>
       <Footer />
     </div>
@@ -76,7 +81,8 @@ function Footer() {
   const narrow = useNarrow();
   const link: CSSProperties = { fontFamily: FONT_BODY, fontSize: "0.85rem", color: INK, textDecoration: "none", opacity: 0.8 };
   return (
-    <footer style={{ marginTop: "clamp(3rem, 7vw, 5.5rem)" }}>
+    <footer>
+      <LineBand />
       <Container style={{
         padding: `1.5rem ${GUTTER} calc(1.5rem + env(safe-area-inset-bottom, 0px))`,
         display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.75rem 1.5rem",
@@ -89,7 +95,6 @@ function Footer() {
           {!narrow && <Link to="/ride" style={{ ...link, color: MUTED }}>take the ride →</Link>}
         </div>
       </Container>
-      <LineBand />
     </footer>
   );
 }
@@ -133,20 +138,16 @@ export function Bullets({ items, color, size = "0.93rem" }: { items: string[]; c
 }
 
 /** Page title block used by every section page. */
-export function PageTitle({ title, lede }: { title: string; lede?: string }) {
+export function PageTitle({ title }: { title: string }) {
   return (
-    <Container style={{ paddingTop: "clamp(2rem, 5vw, 3.5rem)", paddingBottom: "0.5rem" }}>
-      <h1 style={{
+    <Container style={{ paddingTop: "clamp(4.5rem, 8vw, 6.5rem)", paddingBottom: "0.5rem" }}>
+      <h1 data-rb="title" style={{
         fontFamily: FONT_DISPLAY, fontStyle: "italic", fontWeight: 200,
         fontSize: "clamp(2.6rem, 6vw, 4.4rem)", letterSpacing: "-0.03em", lineHeight: 1, margin: 0, color: INK,
+        display: "inline-block",
       }}>
         {title}
       </h1>
-      {lede && (
-        <p style={{ margin: "1rem 0 0", fontFamily: FONT_BODY, fontSize: "clamp(0.98rem, 1.5vw, 1.1rem)", lineHeight: 1.6, color: MUTED, maxWidth: "58ch" }}>
-          {lede}
-        </p>
-      )}
     </Container>
   );
 }
