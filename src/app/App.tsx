@@ -1,21 +1,31 @@
-import { useEffect, useState } from "react";
-import Site from "./Site";
+import { createBrowserRouter, Navigate, RouterProvider } from "react-router";
+import Layout from "./components/Layout";
+import Home from "./pages/Home";
+import SectionPage from "./pages/SectionPage";
 import Ride from "./Ride";
 import { useNarrow } from "./hooks/useMediaQuery";
 
 export type { Item, Media, Activity, Award } from "./content";
 export { SECTIONS, SECTION_CONTENT } from "./content";
 
-/** Root: the main page by default; the rollercoaster intro at #ride (desktop only). */
-export default function App() {
+/** The rollercoaster intro is desktop and tablet only. */
+function RideRoute() {
   const narrow = useNarrow();
-  const [hash, setHash] = useState(() => (typeof window !== "undefined" ? window.location.hash : ""));
+  return narrow ? <Navigate to="/" replace /> : <Ride />;
+}
 
-  useEffect(() => {
-    const onHash = () => setHash(window.location.hash);
-    window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
-  }, []);
+const router = createBrowserRouter([
+  { path: "/ride", element: <RideRoute /> },
+  {
+    element: <Layout />,
+    children: [
+      { path: "/", element: <Home /> },
+      { path: "/:section", element: <SectionPage /> },
+      { path: "*", element: <Navigate to="/" replace /> },
+    ],
+  },
+]);
 
-  return hash === "#ride" && !narrow ? <Ride /> : <Site />;
+export default function App() {
+  return <RouterProvider router={router} />;
 }

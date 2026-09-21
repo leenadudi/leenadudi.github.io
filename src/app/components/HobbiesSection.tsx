@@ -4,7 +4,7 @@ import { feature } from "topojson-client";
 import type { Topology } from "topojson-specification";
 import { rgba } from "../lib/color";
 import { useNarrow } from "../hooks/useMediaQuery";
-import { CARD, FONT_BODY, INK, LINE, MUTED, RADIUS } from "../lib/tokens";
+import { FONT_BODY, INK, LINE, MUTED } from "../lib/tokens";
 
 // ── Static content ────────────────────────────────────────────────────────────
 
@@ -196,19 +196,17 @@ function Globe({ ink }: { ink: string }) {
 export default function HobbiesSection({ color }: { color: string }) {
   const narrow = useNarrow();
   const ink = INK;
-  const box: React.CSSProperties = {
-    background: CARD, border: `1px solid ${LINE}`, borderRadius: RADIUS, padding: "1.25rem 1.4rem",
-    display: "flex", flexDirection: "column", minWidth: 0,
-  };
+  void color;
+  const box: React.CSSProperties = { display: "flex", flexDirection: "column", minWidth: 0 };
   return (
-    <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1.2fr 1fr", gap: "1rem" }}>
+    <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1.2fr 1fr", gap: narrow ? "2rem" : "2.5rem 3rem" }}>
 
       {/* Basketball essay */}
-      <div style={{ ...box, borderTop: `3px solid ${color}` }}>
+      <div style={box}>
         <Label>basketball</Label>
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.9rem", maxWidth: "62ch" }}>
           {BASKETBALL_ESSAY.map((para, i) => (
-            <p key={i} style={{ margin: 0, fontFamily: FONT_BODY, fontSize: "0.92rem", lineHeight: 1.7, color: ink }}>
+            <p key={i} style={{ margin: 0, fontFamily: FONT_BODY, fontSize: "0.98rem", lineHeight: 1.7, color: ink }}>
               {para}
             </p>
           ))}
@@ -221,7 +219,7 @@ export default function HobbiesSection({ color }: { color: string }) {
         <div style={{
           flex: narrow ? "none" : 1,
           height: narrow ? "min(80vw, 340px)" : undefined,
-          borderRadius: 10, overflow: "hidden", background: rgba(ink, 0.04), border: `1px solid ${LINE}`,
+          borderRadius: 12, overflow: "hidden", background: rgba(ink, 0.04), border: `1px solid ${LINE}`,
         }}>
           <Globe ink={ink} />
         </div>

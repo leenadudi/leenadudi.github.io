@@ -5,11 +5,16 @@ export const GITHUB   = "https://github.com/leenadudi";
 export const LINKEDIN = "https://linkedin.com/in/leenadudi";
 
 export const SECTIONS = [
-  { id: "experience", title: "experience", color: "#34C8C5" },
-  { id: "projects",   title: "projects",   color: "#DF84BD" },
-  { id: "school",     title: "school",     color: "#FC8A8E" },
-  { id: "service",    title: "service",    color: "#FFAE69" },
-  { id: "hobbies",    title: "hobbies",    color: "#FEE09D" },
+  { id: "experience", title: "experience", color: "#34C8C5", move: "loop",
+    teaser: "Agent Vista, Bungii, NASA, Kiewit" },
+  { id: "projects",   title: "projects",   color: "#DF84BD", move: "wave",
+    teaser: "clerkflow, leena's music brain, wyrather, llrise" },
+  { id: "school",     title: "school",     color: "#FC8A8E", move: "braid",
+    teaser: "MIT, FIFA and the Sports Lab, the Urban Risk Lab, Momentum" },
+  { id: "service",    title: "service",    color: "#FFAE69", move: "coil",
+    teaser: "tutoring, Million Girls Moonshot, Heartland STEM, FIRST, BPA" },
+  { id: "hobbies",    title: "hobbies",    color: "#FEE09D", move: "loop",
+    teaser: "basketball, travel, reading, music" },
 ] as const;
 export type SectionId = (typeof SECTIONS)[number]["id"];
 
@@ -129,7 +134,7 @@ export const SECTION_CONTENT: { items: Item[] }[] = [
 
   // ── school ────────────────────────────────────────────────────────
   { items: [
-      { title: "Massachusetts Institute of Technology", meta: "B.S. Computer Science (AI & Decision Making) and Physics · Class of 2029", art: "dome",
+      { title: "Massachusetts Institute of Technology", meta: "B.S. Computer Science and Engineering · Class of 2029", art: "dome",
         bullets: [
           "Intro to Programming & CS",
           "Fundamentals of Programming",

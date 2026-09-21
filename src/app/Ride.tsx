@@ -8,6 +8,7 @@ import { useRef, useLayoutEffect, useState, useEffect, useMemo } from "react";
 import { useScroll } from "motion/react";
 import { useFinePointer, useNarrow, useStageSize } from "./hooks/useMediaQuery";
 import { labelColor } from "./lib/color";
+import { Link } from "react-router";
 import { EMAIL, SECTIONS } from "./content";
 
 const VW = 1000;
@@ -714,9 +715,9 @@ function RideColumns({ opacity, live }: { opacity: number; live: boolean }) {
       {SECTIONS.map((s) => {
         const ink = labelColor(s.color);
         return (
-          <a
+          <Link
             key={s.id}
-            href={`#${s.id}`}
+            to={`/${s.id}`}
             className="ride-col"
             style={{
               flex: 1, background: s.color, color: ink, textDecoration: "none",
@@ -735,7 +736,7 @@ function RideColumns({ opacity, live }: { opacity: number; live: boolean }) {
                 <path d="M1 1L8 8L15 1" stroke={ink} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </span>
-          </a>
+          </Link>
         );
       })}
     </div>
