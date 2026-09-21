@@ -594,9 +594,9 @@ const stageStyle: React.CSSProperties = {
   position: "sticky", top: 0, width: "100%", overflow: "hidden", background: CREAM,
 };
 
-// ── Component ─────────────────────────────────────────────────────────────────
-export default function App() {
-  const narrow = useNarrow();
+// ── Ride (desktop + tablet) ───────────────────────────────────────────────────
+function RideApp() {
+  const narrow = false; // phones use MobileApp; the ride only renders at ≥ 768px
   const finePointer = useFinePointer();
   const stageRef = useRef<HTMLDivElement>(null);
   const { w: vw, h: vh } = useStageSize(stageRef);
@@ -660,14 +660,6 @@ export default function App() {
 
   const nameOpacity = Math.max(0, 1 - p1 * 10);
   const [activeSection, setActiveSection] = useState<number | null>(null);
-  const [hoverSection, setHoverSection]   = useState<number | null>(null);
-
-  // Escape closes an open section.
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setActiveSection(null); };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
 
   // Scroll nudge - appears 2s after load, fades as soon as user scrolls
   const [nudgeVisible, setNudgeVisible] = useState(false);
@@ -933,14 +925,43 @@ export default function App() {
           <Caption p={p3e} at={0.08} fadeOut={0.52} x="20%"  y="15%" nx="8%" ny="12%">hope you enjoyed the ride!</Caption>
           <Caption p={p3e} at={0.3}  fadeOut={0.52} x="65%" y="25%" nx="30%" ny="20%">now more about me…</Caption>
 
-          {/* Interactive column layer - fades in with animation, handles expand/collapse.
-              Desktop: five columns side by side. Phone: five bands stacked vertically. */}
-          <div className="absolute inset-0 flex"
-            style={{
-              flexDirection: narrow ? "column" : "row",
-              opacity: p3LabelOpacity,
-              pointerEvents: portfolioLive ? "auto" : "none",
-            }}>
+          {/* Interactive column layer - fades in with the bar animation */}
+          <PortfolioColumns
+            narrow={false}
+            active={activeSection}
+            onChange={setActiveSection}
+            className="absolute inset-0 flex"
+            style={{ flexDirection: "row", opacity: p3LabelOpacity, pointerEvents: portfolioLive ? "auto" : "none" }}
+          />
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ── Portfolio columns (shared by the ride and the phone layout) ───────────────
+// Desktop: five columns side by side, one expands sideways.
+// Phone: five bands stacked vertically, one expands like an accordion.
+function PortfolioColumns({ narrow, active, onChange, className, style }: {
+  narrow: boolean;
+  active: number | null;
+  onChange: (i: number | null) => void;
+  className?: string;
+  style?: React.CSSProperties;
+}) {
+  const activeSection = active;
+  const setActiveSection = onChange;
+  const [hoverSection, setHoverSection] = useState<number | null>(null);
+
+  // Escape closes an open section.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onChange(null); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onChange]);
+
+  return (
+    <div className={className} style={style}>
             {SECTIONS.map((s, i) => {
               const isActive    = activeSection === i;
               const isCollapsed = activeSection !== null && !isActive;
@@ -1082,9 +1103,67 @@ export default function App() {
                 </div>
               );
             })}
-          </div>
-        </div>
-      </div>
-    </>
+    </div>
   );
+}
+
+// ── Phone layout: no ride, one screen ────────────────────────────────────────
+// Name and tagline on top, the five bands fill the rest. Opening a band folds
+// the header away so the panel gets the whole screen.
+function MobileApp() {
+  const [active, setActive] = useState<number | null>(null);
+  const open = active !== null;
+  return (
+    <div className="stage" style={{
+      display: "flex", flexDirection: "column", background: CREAM,
+      position: "relative", overflow: "hidden",
+    }}>
+      <header style={{
+        flexShrink: 0, overflow: "hidden",
+        maxHeight: open ? 0 : "45vh",
+        opacity: open ? 0 : 1,
+        transition: "max-height 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease",
+      }}>
+        <div style={{ padding: "calc(2.25rem + env(safe-area-inset-top, 0px)) 1.25rem 1.5rem" }}>
+          <h1 style={{
+            fontFamily: "'Poppins',sans-serif", fontStyle: "italic", fontWeight: 200,
+            fontSize: "clamp(2.6rem,13vw,3.6rem)", color: "#000000",
+            letterSpacing: "-0.035em", lineHeight: 0.95, margin: 0,
+          }}>
+            leena dudi
+          </h1>
+          <p style={{
+            margin: "0.9rem 0 0",
+            fontFamily: "'Plus Jakarta Sans',sans-serif", fontWeight: 500,
+            fontSize: "0.95rem", color: "#000000", opacity: 0.85, letterSpacing: "0.01em",
+          }}>
+            computer science at MIT · class of 2029
+          </p>
+          <a href={`mailto:${EMAIL}`} style={{
+            display: "inline-block", marginTop: "0.35rem",
+            fontFamily: "'Plus Jakarta Sans',sans-serif", fontStyle: "italic",
+            fontSize: "0.9rem", color: "#000000", opacity: 0.55, textDecoration: "none",
+          }}>
+            {EMAIL}
+          </a>
+        </div>
+        <div aria-hidden style={{
+          height: 3, background: "linear-gradient(90deg,#34C8C5,#DF84BD,#FC8A8E,#FFAE69,#FEE09D)",
+        }} />
+      </header>
+
+      <PortfolioColumns
+        narrow
+        active={active}
+        onChange={setActive}
+        style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}
+      />
+    </div>
+  );
+}
+
+// ── Root: pick a layout by screen width ───────────────────────────────────────
+export default function App() {
+  const narrow = useNarrow();
+  return narrow ? <MobileApp /> : <RideApp />;
 }
