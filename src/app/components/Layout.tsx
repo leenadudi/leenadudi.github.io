@@ -1,11 +1,11 @@
 /** Shared page chrome: sticky nav, content column, footer with the line band. */
-import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
+import { useEffect, type CSSProperties, type ReactNode } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router";
 import { EMAIL, GITHUB, LINKEDIN, SECTIONS } from "../content";
-import { useMediaQuery, useNarrow } from "../hooks/useMediaQuery";
+import { useNarrow } from "../hooks/useMediaQuery";
 import { rgba } from "../lib/color";
 import { CONTAINER, CREAM, FONT_BODY, FONT_DISPLAY, GUTTER, INK, LINE, MUTED } from "../lib/tokens";
-import PageRibbon, { LineBand, MOVES } from "./PageRibbon";
+
 
 export function Container({ children, style }: { children: ReactNode; style?: CSSProperties }) {
   return (
@@ -18,16 +18,12 @@ export function Container({ children, style }: { children: ReactNode; style?: CS
 /** Root layout for every route except the ride. */
 export default function Layout() {
   const { pathname } = useLocation();
-  const mainRef = useRef<HTMLElement>(null);
   useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
   return (
     <div style={{ background: CREAM, color: INK, minHeight: "100dvh", fontFamily: FONT_BODY, display: "flex", flexDirection: "column" }}>
       <Nav />
-      <main ref={mainRef} style={{ flex: 1, position: "relative", overflow: "hidden", paddingBottom: "clamp(3rem, 7vw, 5.5rem)" }}>
-        <PageRibbon key={pathname} mainRef={mainRef} move={MOVES[pathname.replace(/^\//, "")] ?? "loop"} />
-        <div style={{ position: "relative", zIndex: 1 }}>
-          <Outlet />
-        </div>
+      <main style={{ flex: 1, paddingBottom: "clamp(3rem, 7vw, 5.5rem)" }}>
+        <Outlet />
       </main>
       <Footer />
     </div>
@@ -137,17 +133,25 @@ export function Bullets({ items, color, size = "0.93rem" }: { items: string[]; c
 }
 
 /** Page title block used by every section page. */
-export function PageTitle({ title }: { title: string }) {
-  const compact = useMediaQuery("(max-width: 1099px)");
+export function PageTitle({ title, color }: { title: string; color: string }) {
   return (
-    <Container style={{ paddingTop: compact ? "9.75rem" : "12rem", paddingBottom: "0.5rem" }}>
-      <h1 data-rb="title" style={{
+    <Container style={{ paddingTop: "clamp(2.5rem, 6vw, 4.5rem)", paddingBottom: "0.5rem" }}>
+      <h1 style={{
         fontFamily: FONT_DISPLAY, fontStyle: "italic", fontWeight: 200,
         fontSize: "clamp(2.6rem, 6vw, 4.4rem)", letterSpacing: "-0.03em", lineHeight: 1, margin: 0, color: INK,
-        display: "inline-block",
       }}>
         {title}
       </h1>
+      <div aria-hidden style={{ width: "3.5rem", height: 4, borderRadius: 2, background: color, marginTop: "1.1rem" }} />
     </Container>
+  );
+}
+
+/** Five thin lines stacked, for the page foot. */
+export function LineBand({ thickness = 4 }: { thickness?: number }) {
+  return (
+    <div aria-hidden style={{ display: "flex", flexDirection: "column" }}>
+      {SECTIONS.map(s => <div key={s.id} style={{ height: thickness, background: s.color }} />)}
+    </div>
   );
 }

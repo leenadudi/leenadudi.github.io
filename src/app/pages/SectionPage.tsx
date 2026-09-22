@@ -16,8 +16,8 @@ export default function SectionPage() {
 
   return (
     <>
-      <PageTitle title={s.title} />
-      <Container style={{ paddingTop: "clamp(2rem, 4vw, 3.5rem)" }}>
+      <PageTitle title={s.title} color={s.color} />
+      <Container style={{ paddingTop: "clamp(1.5rem, 3vw, 2.5rem)" }}>
         {s.id === "experience" || s.id === "service" ? (
           <EntryList items={items} color={s.color} />
         ) : s.id === "projects" ? (

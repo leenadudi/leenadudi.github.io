@@ -15,4 +15,4 @@ export const STRIPE = "linear-gradient(90deg,#34C8C5,#DF84BD,#FC8A8E,#FFAE69,#FE
 
 export const RADIUS = 14;
 export const CONTAINER = 1040;
-export const GUTTER = "clamp(1.25rem, 8vw, 6rem)";
+export const GUTTER = "clamp(1.25rem, 5vw, 3rem)";
