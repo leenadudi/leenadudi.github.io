@@ -1,8 +1,6 @@
-/** Home: the name, and the five sections in big type. The page ribbon comes in
- *  from the left, loops beside the name, and then fans out so each strand
- *  underlines its own section. */
+/** Home: the name, one line, email, and the ribbon drawing beside the name. */
 import { Link } from "react-router";
-import { EMAIL, SECTIONS } from "../content";
+import { EMAIL } from "../content";
 import { useNarrow } from "../hooks/useMediaQuery";
 import { CREAM, FONT_BODY, FONT_DISPLAY, INK, MUTED, STRIPE } from "../lib/tokens";
 import { Container } from "../components/Layout";
@@ -11,7 +9,7 @@ export default function Home() {
   const narrow = useNarrow();
   return (
     <>
-      <header data-rb="hero" style={{ padding: narrow ? "2.5rem 0 0" : "clamp(3rem, 7vw, 5.5rem) 0 0" }}>
+      <header data-rb="hero" style={{ padding: narrow ? "2.5rem 0 9rem" : "clamp(4rem, 9vw, 7rem) 0 4rem", minHeight: narrow ? undefined : "calc(100dvh - 56px - 8rem)" }}>
         <Container>
           <div style={{
             display: "grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0, 1.1fr) minmax(0, 1fr)",
@@ -48,25 +46,6 @@ export default function Home() {
         </Container>
       </header>
 
-      {/* Section index: each strand of the ribbon lands under its own title */}
-      <Container style={{ paddingTop: narrow ? "8rem" : "4rem", paddingBottom: narrow ? "1rem" : "3rem" }}>
-        <nav aria-label="sections" style={{ display: "flex", flexDirection: "column", gap: narrow ? "1.6rem" : "2rem" }}>
-          {SECTIONS.map((s) => (
-            <Link key={s.id} to={`/${s.id}`} className="index-row" style={{ color: INK, textDecoration: "none", alignSelf: "flex-start" }}>
-              <span data-rb="row" style={{
-                display: "inline-flex", alignItems: "baseline", gap: "0.9rem",
-                borderLeft: `6px solid ${s.color}`, paddingLeft: narrow ? "0.9rem" : "1.2rem",
-                fontFamily: FONT_DISPLAY, fontStyle: "italic", fontWeight: 200,
-                fontSize: narrow ? "clamp(2.2rem, 10vw, 2.8rem)" : "clamp(2.6rem, 4.6vw, 3.8rem)",
-                letterSpacing: "-0.03em", lineHeight: 1,
-              }}>
-                {s.title}
-                <span aria-hidden className="index-arrow" style={{ fontFamily: FONT_BODY, fontStyle: "normal", fontWeight: 400, fontSize: "0.5em", opacity: 0.55 }}>→</span>
-              </span>
-            </Link>
-          ))}
-        </nav>
-      </Container>
     </>
   );
 }
