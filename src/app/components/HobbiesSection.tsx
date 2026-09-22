@@ -199,7 +199,7 @@ export default function HobbiesSection({ color }: { color: string }) {
   void color;
   const box: React.CSSProperties = { display: "flex", flexDirection: "column", minWidth: 0 };
   return (
-    <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1.2fr 1fr", gap: narrow ? "2rem" : "2rem 3rem", paddingBottom: "2rem" }}>
+    <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1.2fr 1fr", gap: narrow ? "2rem" : "3.4rem 3rem", paddingBottom: "2rem" }}>
 
       {/* Basketball essay */}
       <div style={box}>

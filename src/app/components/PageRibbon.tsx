@@ -127,109 +127,121 @@ function strandPaths(route: Route, gap: number, lean: number): string[] {
 }
 
 // ── Route planning from the DOM ─────────────────────────────────────────────
-type Metrics = { W: number; H: number; narrow: boolean };
+// The ribbon only travels through empty space: above the page title, down the
+// gutters beside the content, across the gaps between entries, and (on the
+// home page) inside the empty column beside the name and under the intro.
+type Metrics = { W: number; H: number; narrow: boolean; compact: boolean };
 
 function rect(el: Element, root: DOMRect): DOMRect {
   const r = el.getBoundingClientRect();
   return new DOMRect(r.left - root.left, r.top - root.top, r.width, r.height);
 }
 
+export function geometry(narrow: boolean, compact: boolean) {
+  const small = narrow || compact;
+  return {
+    gap: small ? 8.5 : 12,      // strand spacing
+    sw: small ? 10 : 14,        // stroke width
+    half: small ? 22 : 31,      // half the bundle width
+    R: small ? 44 : 80,         // corner radius (centre line)
+    loopR: small ? 30 : 46,     // loop radius
+    lean: small ? 5 : 8,
+    fanR: small ? 34 : 60,
+  };
+}
+
 function planRoute(main: HTMLElement, m: Metrics): Route | null {
   const root = main.getBoundingClientRect();
   const q = (sel: string) => Array.from(main.querySelectorAll<HTMLElement>(`[data-rb="${sel}"]`));
   const title = q("title")[0];
+  const hero = q("hero")[0];
   const heroLoop = q("hero-loop")[0];
   const heroCta = q("hero-cta")[0];
   const crosses = q("cross").map(el => rect(el, root));
-  const index = q("index")[0];
   const rows = q("row").map(el => rect(el, root));
-  const { W, H, narrow } = m;
-  const R = narrow ? 44 : 80;
-  const loopR = narrow ? 30 : 46;
+  const { W, H, narrow, compact } = m;
+  const g = geometry(narrow, compact);
+  const { R, loopR, half } = g;
   const OFF = 120; // off-screen run-in
 
-  // content column edges
+  // content column edges (the ribbon's lanes live outside them)
   const colEl = title ?? heroCta ?? heroLoop;
   if (!colEl) return null;
   const colParent = colEl.closest("main > * > div, main > div") as HTMLElement | null;
   const col = rect(colParent ?? colEl, root);
-  const gutter = narrow ? 20 : Math.max(20, rect(colEl, root).left - col.left);
+  const gutter = Math.max(20, rect(colEl, root).left - col.left);
   const cl = col.left + gutter, cr = col.right - gutter;
-  const xR = W - cr >= 130 ? cr + 70 : W - 36;
-  const xL = cl >= 130 ? cl - 70 : 36;
+  const laneR = W - cr, laneL = cl;                     // gutter widths
+  const xR = laneR >= 2 * half + 40 ? cr + half + 40 : W - half - 6;
+  const xL = laneL >= 2 * half + 40 ? cl - half - 40 : half + 6;
+  const lanesFit = !narrow && xR - half >= cr + 2 && xL + half <= cl - 2;
 
   const legs: Leg[] = [];
   let start: Pt;
   let side: "R" | "L" = "R";
   let fan: Fan | undefined;
 
-  if (heroLoop && !narrow) {
-    // Home: come in under the buttons, rise in the empty right column into the
-    // tower beside the name, exit high on the right.
-    const L = rect(heroLoop, root);
-    const c = heroCta ? rect(heroCta, root) : L;
-    const yLow = Math.max(c.bottom + 46, L.top + L.height * 0.85);
-    const yHigh = L.top + L.height * 0.55;
-    start = { x: -OFF, y: yLow };
-    legs.push({ to: { x: L.left - 30, y: yLow } });
-    legs.push({ to: { x: L.left + 150, y: yHigh }, kind: "step" });
-    legs.push({ to: { x: xR, y: yHigh }, loops: [{ x: L.left + L.width * 0.55, r: Math.min(56, L.height * 0.18) }] });
-  } else if (heroCta) {
-    // Home on phones: start under the buttons, small loop, descend the right edge.
-    const c = rect(heroCta, root);
-    const y = c.bottom + 44;
-    start = { x: -OFF, y };
-    legs.push({ to: { x: xR, y }, loops: [{ x: W * 0.5, r: loopR }] });
-  } else if (title) {
-    // Section page: pass behind the title, loop to its right, descend on the right.
-    const t = rect(title, root);
-    const y = t.top + t.height * 0.62;
-    const maxX = xR - R - loopR - lean(narrow) * 4 - 10;      // last x where the tower still fits
-    const loopX = Math.min(narrow ? Math.max(t.right + 24, W * 0.5) : Math.max(t.right + 110, cr - 260), maxX);
-    start = { x: -OFF, y };
-    legs.push({ to: { x: xR, y }, loops: loopX > t.right + 10 ? [{ x: loopX, r: loopR }] : [] });
-  } else {
-    return null;
+  if (hero && rows.length === N) {
+    // ── Home ────────────────────────────────────────────────────────────
+    const h = rect(hero, root);
+    const c = heroCta ? rect(heroCta, root) : h;
+    if (heroLoop && !narrow) {
+      // In from the right edge, loop in the empty column beside the name, dive
+      // down inside that column, sweep left under the intro, then fan out.
+      const L = rect(heroLoop, root);
+      const r = Math.min(loopR + 10, L.height * 0.18);
+      const yHigh = L.top + L.height * 0.5;
+      const xDive = L.left + half + 40;
+      const yBand = Math.max(h.bottom, c.bottom) + half + 40;
+      start = { x: W + OFF, y: yHigh };
+      legs.push({ to: { x: xDive, y: yHigh }, loops: [{ x: Math.max(xDive + R + r + 40, L.left + L.width * 0.55), r }] });
+      legs.push({ to: { x: xDive, y: yBand } });
+      legs.push({ to: { x: xL, y: yBand } });
+    } else {
+      // Phone: in from the right under the buttons, loop, over to the left lane.
+      const yBand = c.bottom + half + 84;
+      start = { x: W + OFF, y: yBand };
+      legs.push({ to: { x: xL, y: yBand }, loops: [{ x: Math.max(W * 0.55, xL + R + loopR + 40), r: loopR }] });
+    }
+    const ys = rows.map(rw => rw.bottom + (narrow ? 6 : 10));
+    legs.push({ to: { x: xL, y: ys[0] - g.fanR - 4 } });
+    fan = { ys, toX: cr, r: g.fanR };
+    return { start, legs, radius: R, fan };
   }
 
-  // Cross the page at every gap, alternating sides.
-  let lastY = legs[legs.length - 1].to.y;
-  for (const c of crosses) {
-    const y = c.top;
-    if (y - lastY < 2 * R + 40) continue;        // too close to the previous corner
+  if (!title) return null;
+
+  // ── Section page ──────────────────────────────────────────────────────
+  // Flourish above the title: in from the left, loop tower to the right of
+  // the title, out to the right lane (or off the right edge on phones).
+  const t = rect(title, root);
+  const y = t.top - half - (narrow ? 14 : 18);
+  const endX = lanesFit ? xR : W + OFF;
+  const maxX = endX - R - loopR - g.lean * 4 - 10;
+  const loopX = Math.min(narrow || compact ? Math.max(t.right + 30, W * 0.55) : Math.max(t.right + 110, cr - 260), maxX);
+  start = { x: -OFF, y };
+  legs.push({ to: { x: endX, y }, loops: loopX > t.right + 10 ? [{ x: loopX, r: loopR }] : [] });
+  if (!lanesFit) return { start, legs, radius: R };
+
+  // Down the right lane; cross the page at every gap between entries.
+  let lastY = y;
+  for (const cx of crosses) {
+    const cy = cx.top;
+    if (cy - lastY < 2 * R + 40) continue;
     const from = side === "R" ? xR : xL;
     const to   = side === "R" ? xL : xR;
-    legs.push({ to: { x: from, y } });
-    legs.push({ to: { x: to, y } });
+    legs.push({ to: { x: from, y: cy } });
+    legs.push({ to: { x: to, y: cy } });
     side = side === "R" ? "L" : "R";
-    lastY = y;
+    lastY = cy;
   }
-
-  const xEnd = side === "R" ? xR : xL;
-  if (index && rows.length === N) {
-    // Home: cross above the index to the left margin, then fan out under the rows.
-    const ix = rect(index, root);
-    const fr = narrow ? 34 : 60;
-    const yCross = ix.top - (narrow ? 56 : 80);
-    if (side === "R") {
-      legs.push({ to: { x: xR, y: yCross } });
-      legs.push({ to: { x: xL, y: yCross } });
-    }
-    const ys = rows.map(r => r.bottom + (narrow ? 6 : 10));
-    legs.push({ to: { x: xL, y: ys[0] - fr - 4 } });
-    fan = { ys, toX: cr, r: fr };
-  } else {
-    // Run off the bottom into the footer band.
-    legs.push({ to: { x: xEnd, y: H + OFF } });
-  }
-  return { start, legs, radius: R, fan };
+  legs.push({ to: { x: side === "R" ? xR : xL, y: H + OFF } });
+  return { start, legs, radius: R };
 }
-
-const lean = (narrow: boolean) => (narrow ? 5 : 8);
 
 /** Draws the ribbon behind `mainRef`'s content. Re-plans on resize and content changes. */
 export default function PageRibbon({ mainRef, narrow }: { mainRef: RefObject<HTMLElement | null>; narrow: boolean }) {
-  const [state, setState] = useState<{ W: number; H: number; paths: string[] } | null>(null);
+  const [state, setState] = useState<{ W: number; H: number; sw: number; paths: string[] } | null>(null);
 
   // A passive effect: the parent's ref is attached by the time it runs.
   useEffect(() => {
@@ -238,10 +250,11 @@ export default function PageRibbon({ mainRef, narrow }: { mainRef: RefObject<HTM
     let raf = 0;
     const plan = () => {
       const W = main.clientWidth, H = main.scrollHeight;
-      const route = planRoute(main, { W, H, narrow });
+      const compact = W < 1100;
+      const route = planRoute(main, { W, H, narrow, compact });
       if (!route) { setState(null); return; }
-      const gap = narrow ? 8.5 : 12;
-      setState({ W, H, paths: strandPaths(route, gap, lean(narrow)) });
+      const g = geometry(narrow, compact);
+      setState({ W, H, sw: g.sw, paths: strandPaths(route, g.gap, g.lean) });
     };
     const schedule = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(plan); };
     plan();
@@ -255,7 +268,7 @@ export default function PageRibbon({ mainRef, narrow }: { mainRef: RefObject<HTM
   }, [mainRef, narrow]);
 
   if (!state) return null;
-  const sw = narrow ? 10 : 14;
+  const sw = state.sw;
   return (
     <svg aria-hidden width={state.W} height={state.H} viewBox={`0 0 ${state.W} ${state.H}`}
       style={{ position: "absolute", top: 0, left: 0, width: state.W, height: state.H, pointerEvents: "none", zIndex: 0, overflow: "hidden" }}>

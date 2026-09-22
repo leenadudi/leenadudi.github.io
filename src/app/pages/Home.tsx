@@ -11,11 +11,11 @@ export default function Home() {
   const narrow = useNarrow();
   return (
     <>
-      <header style={{ padding: narrow ? "2.5rem 0 0" : "clamp(3rem, 7vw, 5.5rem) 0 0" }}>
+      <header data-rb="hero" style={{ padding: narrow ? "2.5rem 0 0" : "clamp(3rem, 7vw, 5.5rem) 0 0" }}>
         <Container>
           <div style={{
             display: "grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0, 1.1fr) minmax(0, 1fr)",
-            gap: narrow ? "2rem" : "3rem", alignItems: "center",
+            gap: narrow ? "2rem" : "4rem", alignItems: "center",
           }}>
             <div>
               <h1 style={{
@@ -49,8 +49,8 @@ export default function Home() {
       </header>
 
       {/* Section index: each strand of the ribbon lands under its own title */}
-      <Container style={{ paddingTop: narrow ? "7rem" : "9rem", paddingBottom: narrow ? "1rem" : "3rem" }}>
-        <nav aria-label="sections" data-rb="index" style={{ display: "flex", flexDirection: "column", gap: narrow ? "1.6rem" : "2.1rem" }}>
+      <Container style={{ paddingTop: "11rem", paddingBottom: narrow ? "1rem" : "3rem" }}>
+        <nav aria-label="sections" data-rb="index" style={{ display: "flex", flexDirection: "column", gap: narrow ? "1.6rem" : "2.1rem", paddingLeft: narrow ? "3.5rem" : 0 }}>
           {SECTIONS.map((s) => (
             <Link key={s.id} to={`/${s.id}`} className="index-row" style={{ color: INK, textDecoration: "none", alignSelf: "flex-start" }}>
               <span data-rb="row" style={{

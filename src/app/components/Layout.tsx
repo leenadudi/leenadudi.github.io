@@ -2,7 +2,7 @@
 import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router";
 import { EMAIL, GITHUB, LINKEDIN, SECTIONS } from "../content";
-import { useNarrow } from "../hooks/useMediaQuery";
+import { useMediaQuery, useNarrow } from "../hooks/useMediaQuery";
 import { rgba } from "../lib/color";
 import { CONTAINER, CREAM, FONT_BODY, FONT_DISPLAY, GUTTER, INK, LINE, MUTED } from "../lib/tokens";
 import PageRibbon, { LineBand } from "./PageRibbon";
@@ -139,8 +139,9 @@ export function Bullets({ items, color, size = "0.93rem" }: { items: string[]; c
 
 /** Page title block used by every section page. */
 export function PageTitle({ title }: { title: string }) {
+  const compact = useMediaQuery("(max-width: 1099px)");
   return (
-    <Container style={{ paddingTop: "clamp(4.5rem, 8vw, 6.5rem)", paddingBottom: "0.5rem" }}>
+    <Container style={{ paddingTop: compact ? "8.75rem" : "11.75rem", paddingBottom: "0.5rem" }}>
       <h1 data-rb="title" style={{
         fontFamily: FONT_DISPLAY, fontStyle: "italic", fontWeight: 200,
         fontSize: "clamp(2.6rem, 6vw, 4.4rem)", letterSpacing: "-0.03em", lineHeight: 1, margin: 0, color: INK,
