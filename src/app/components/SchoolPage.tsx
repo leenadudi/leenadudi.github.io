@@ -60,7 +60,7 @@ export default function SchoolPage({ items, color }: { items: Item[]; color: str
 
       {/* Research and projects */}
       {research.length > 0 && (
-        <section data-rb="cross" style={{ paddingTop: "clamp(2.4rem, 4vw, 3.4rem)" }}>
+        <section style={{ paddingTop: "clamp(1.5rem, 3vw, 2.25rem)", borderTop: `1px solid ${LINE}` }}>
           <Label>research and projects</Label>
           <div role="tablist" aria-label="research and projects" style={{ display: "flex", gap: "0.45rem", flexWrap: "wrap", marginBottom: "1.4rem" }}>
             {research.map((it, i) => {

@@ -49,12 +49,13 @@ export default function Home() {
       </header>
 
       {/* Section index: each strand of the ribbon lands under its own title */}
-      <Container style={{ paddingTop: "11rem", paddingBottom: narrow ? "1rem" : "3rem" }}>
-        <nav aria-label="sections" data-rb="index" style={{ display: "flex", flexDirection: "column", gap: narrow ? "1.6rem" : "2.1rem", paddingLeft: narrow ? "3.5rem" : 0 }}>
+      <Container style={{ paddingTop: narrow ? "8rem" : "4rem", paddingBottom: narrow ? "1rem" : "3rem" }}>
+        <nav aria-label="sections" style={{ display: "flex", flexDirection: "column", gap: narrow ? "1.6rem" : "2rem" }}>
           {SECTIONS.map((s) => (
             <Link key={s.id} to={`/${s.id}`} className="index-row" style={{ color: INK, textDecoration: "none", alignSelf: "flex-start" }}>
               <span data-rb="row" style={{
                 display: "inline-flex", alignItems: "baseline", gap: "0.9rem",
+                borderLeft: `6px solid ${s.color}`, paddingLeft: narrow ? "0.9rem" : "1.2rem",
                 fontFamily: FONT_DISPLAY, fontStyle: "italic", fontWeight: 200,
                 fontSize: narrow ? "clamp(2.2rem, 10vw, 2.8rem)" : "clamp(2.6rem, 4.6vw, 3.8rem)",
                 letterSpacing: "-0.03em", lineHeight: 1,

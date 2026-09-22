@@ -1,7 +1,7 @@
 /** Experience and service: dates and role on the left, the work on the right. */
 import type { Item, Media } from "../content";
 import { useNarrow } from "../hooks/useMediaQuery";
-import { FONT_BODY, INK, MUTED } from "../lib/tokens";
+import { FONT_BODY, INK, LINE, MUTED } from "../lib/tokens";
 import { ArrowLink, Bullets, Chip } from "./Layout";
 
 export default function EntryList({ items, color }: { items: Item[]; color: string }) {
@@ -21,11 +21,12 @@ function Entry({ item, color, narrow, first }: { item: Item; color: string; narr
   const pdfs   = (item.media ?? []).filter((m): m is Extract<Media, { type: "pdf" }> => m.type === "pdf");
 
   return (
-    <section data-rb={first ? undefined : "cross"} style={{
+    <section style={{
       display: "grid",
       gridTemplateColumns: narrow ? "1fr" : "200px minmax(0, 1fr)",
       gap: narrow ? "0.6rem" : "2.5rem",
-      padding: narrow ? "2.4rem 0" : "3.4rem 0",
+      padding: narrow ? "1.8rem 0" : "2.5rem 0",
+      borderTop: first ? "none" : `1px solid ${LINE}`,
     }}>
       {/* meta column */}
       <div style={{ fontFamily: FONT_BODY, display: "flex", flexDirection: narrow ? "row" : "column", flexWrap: "wrap", gap: narrow ? "0.25rem 0.75rem" : "0.25rem" }}>

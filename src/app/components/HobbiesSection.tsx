@@ -199,7 +199,7 @@ export default function HobbiesSection({ color }: { color: string }) {
   void color;
   const box: React.CSSProperties = { display: "flex", flexDirection: "column", minWidth: 0 };
   return (
-    <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1.2fr 1fr", gap: narrow ? "2rem" : "3.4rem 3rem", paddingBottom: "2rem" }}>
+    <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1.2fr 1fr", gap: narrow ? "2rem" : "2.5rem 3rem", paddingBottom: "2rem" }}>
 
       {/* Basketball essay */}
       <div style={box}>
@@ -226,7 +226,7 @@ export default function HobbiesSection({ color }: { color: string }) {
       </div>
 
       {/* Reading */}
-      <div data-rb="cross" style={{ ...box, paddingTop: narrow ? "2.4rem" : "3.4rem" }}>
+      <div style={box}>
         <Label>currently reading</Label>
         <div style={{ display: "flex", flexDirection: "column", gap: "0.7rem" }}>
           {READING.map((book, i) => (
@@ -239,7 +239,7 @@ export default function HobbiesSection({ color }: { color: string }) {
       </div>
 
       {/* Albums */}
-      <div style={{ ...box, paddingTop: narrow ? 0 : "3.4rem" }}>
+      <div style={box}>
         <Label>favorite albums</Label>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.55rem 0.9rem" }}>
           {ALBUMS.map((album, i) => (

@@ -5,7 +5,7 @@ import { EMAIL, GITHUB, LINKEDIN, SECTIONS } from "../content";
 import { useMediaQuery, useNarrow } from "../hooks/useMediaQuery";
 import { rgba } from "../lib/color";
 import { CONTAINER, CREAM, FONT_BODY, FONT_DISPLAY, GUTTER, INK, LINE, MUTED } from "../lib/tokens";
-import PageRibbon, { LineBand } from "./PageRibbon";
+import PageRibbon, { LineBand, MOVES } from "./PageRibbon";
 
 export function Container({ children, style }: { children: ReactNode; style?: CSSProperties }) {
   return (
@@ -18,14 +18,13 @@ export function Container({ children, style }: { children: ReactNode; style?: CS
 /** Root layout for every route except the ride. */
 export default function Layout() {
   const { pathname } = useLocation();
-  const narrow = useNarrow();
   const mainRef = useRef<HTMLElement>(null);
   useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
   return (
     <div style={{ background: CREAM, color: INK, minHeight: "100dvh", fontFamily: FONT_BODY, display: "flex", flexDirection: "column" }}>
       <Nav />
       <main ref={mainRef} style={{ flex: 1, position: "relative", overflow: "hidden", paddingBottom: "clamp(3rem, 7vw, 5.5rem)" }}>
-        <PageRibbon key={pathname} mainRef={mainRef} narrow={narrow} />
+        <PageRibbon key={pathname} mainRef={mainRef} move={MOVES[pathname.replace(/^\//, "")] ?? "loop"} />
         <div style={{ position: "relative", zIndex: 1 }}>
           <Outlet />
         </div>
@@ -141,7 +140,7 @@ export function Bullets({ items, color, size = "0.93rem" }: { items: string[]; c
 export function PageTitle({ title }: { title: string }) {
   const compact = useMediaQuery("(max-width: 1099px)");
   return (
-    <Container style={{ paddingTop: compact ? "8.75rem" : "11.75rem", paddingBottom: "0.5rem" }}>
+    <Container style={{ paddingTop: compact ? "9.75rem" : "12rem", paddingBottom: "0.5rem" }}>
       <h1 data-rb="title" style={{
         fontFamily: FONT_DISPLAY, fontStyle: "italic", fontWeight: 200,
         fontSize: "clamp(2.6rem, 6vw, 4.4rem)", letterSpacing: "-0.03em", lineHeight: 1, margin: 0, color: INK,

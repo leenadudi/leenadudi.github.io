@@ -31,7 +31,7 @@ function Project({ item, color, narrow, first, liveOpen, onToggleLive }: {
     m.type === "link" || m.type === "paper" || m.type === "pdf");
 
   return (
-    <section data-rb={first ? undefined : "cross"} style={{ padding: narrow ? "2.4rem 0" : "3.4rem 0" }}>
+    <section style={{ padding: narrow ? "1.8rem 0" : "2.6rem 0", borderTop: first ? "none" : `1px solid ${LINE}` }}>
       <div style={{
         display: "grid",
         gridTemplateColumns: narrow || !item.image ? "1fr" : "minmax(0, 0.9fr) minmax(0, 1.1fr)",
