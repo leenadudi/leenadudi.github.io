@@ -51,7 +51,20 @@ export type Item = {
 export const SECTION_CONTENT: { items: Item[] }[] = [
   // ── experience (reverse-chronological) ───────────────────────────
   { items: [
-      { title: "Agent Vista", meta: "Software Engineer Intern · Jan 2026 - present · Cambridge, MA", art: "flow",
+      { title: "Convexia", meta: "Software Engineer Intern · YC S25 startup · Sept 2026 - present · Remote", art: "flow",
+        bullets: [
+          "Engineered a pipeline that turns 50+ GB of each patient’s records, scattered across PDFs, scans, spreadsheets, and notes in 8+ formats, into one dashboard of labs, medications, diagnoses, and genomics using TypeScript, Next.js, and Supabase",
+          "Designed a deduplication workflow that merges repeated lab results and copied-forward notes across overlapping record exports, using a custom agent to decide ambiguous cases, so every result is counted exactly once",
+          "Developed a Postgres-backed job queue that checkpoints each document, so dashboard builds over large record sets resume after failures instead of starting over",
+        ],
+        skills: ["TypeScript", "Next.js", "Supabase", "PostgreSQL"] },
+      { title: "TekTrek", meta: "Student Founder · 10-week builder residency · June - Aug 2026 · San Francisco, CA", art: "civic",
+        bullets: [
+          "Selected as 1 of 44 founders from MIT, Harvard, and Princeton for a fully funded summer program in San Francisco",
+          "Founded Clerkflow, a knowledge base that turns a town’s scanned records into a queryable graph of officials, resolutions, vendors, and votes using Tesseract OCR, Claude, Postgres, pgvector, and Neo4j; secured a paid contract with Harrisburg, PA",
+        ],
+        skills: ["Tesseract OCR", "Claude", "PostgreSQL", "pgvector", "Neo4j"] },
+      { title: "Agent Vista", meta: "Software Engineer Intern · Jan - Aug 2026 · Cambridge, MA", art: "flow",
         bullets: [
           "Built a document-ingestion and RAG search system: chunks PDFs via the Anthropic Claude Batch API, stores embeddings in PostgreSQL, and serves a query API answering natural-language questions over the documents; deployed on AWS ECS Fargate via Terraform with S3 storage and CodeBuild CI/CD",
           "Designed a multi-LLM business classification system: given a company name and website, predicts industry codes via pgvector semantic search, fuzzy text matching, and three model providers (Claude, Gemini, OpenAI); added hash-based change detection to cache results and sharply cut repeat API costs",
@@ -60,21 +73,21 @@ export const SECTION_CONTENT: { items: Item[] }[] = [
           "Shipped a PII-masking logging library adopted across Java microservices: per-rule configuration toggles and structured JSON field masking for safe, compliant application logs",
         ],
         skills: ["Python", "Java", "Spring Boot", "TypeScript", "Playwright", "PostgreSQL", "pgvector", "LLMs", "AWS ECS", "Terraform", "Docker", "Flask"] },
-      { title: "Bungii", meta: "FP&A / Data Analysis Intern · May - June 2025 · Overland Park, KS", art: "route",
+      { title: "NASA · Earth Sciences Division", meta: "Climate Data Research Intern · May - Aug 2025 · Remote", art: "wildfire",
+        bullets: [
+          "Built a cross-platform wildfire-risk app in Flutter, running a YOLOv8 model on-device via TensorFlow Lite for real-time hazard detection",
+          "Co-authored \"Integrating Machine Learning and Citizen Science in CS-FLARE\", presented at the American Geophysical Union 2025 conference",
+          "Processed satellite and citizen-science datasets to surface actionable wildfire risk signals",
+        ],
+        skills: ["Flutter", "Dart", "TensorFlow Lite", "YOLOv8", "Python"],
+        media: [{ type: "pdf", url: "/cs-flare-paper.pdf", label: "CS-FLARE Research Paper" }] },
+      { title: "Bungii", meta: "FP&A / Data Analysis Intern · May - June 2024 · Overland Park, KS", art: "route",
         bullets: [
           "Led an AI-driven dynamic driver pay project to improve margin efficiency across 15+ delivery markets",
           "Optimized last-mile delivery routes for 10+ enterprise clients, reducing operational overhead",
           "Conducted market research to scope expansion into the box-truck segment",
         ],
         skills: ["Python", "SQL", "Excel", "Pandas"] },
-      { title: "NASA · Earth Sciences Division", meta: "Climate Data Research Intern · May - Aug 2024 · Remote", art: "wildfire",
-        bullets: [
-          "Built a cross-platform wildfire-risk app in Flutter, running a YOLOv8 model on-device via TensorFlow Lite for real-time hazard detection",
-          "Co-authored \"Integrating Machine Learning and Citizen Science in CS-FLARE\", presented at AGU 2024 National Conference",
-          "Processed satellite and citizen-science datasets to surface actionable wildfire risk signals",
-        ],
-        skills: ["Flutter", "Dart", "TensorFlow Lite", "YOLOv8", "Python"],
-        media: [{ type: "pdf", url: "/cs-flare-paper.pdf", label: "CS-FLARE Research Paper" }] },
       { title: "Kiewit Engineering", meta: "Financial Data Analysis Intern · June - July 2023 · Lenexa, KS", art: "grid",
         bullets: [
           "Automated cost-report updates with custom Python scripts, eliminating manual data entry across a 500+ project billing ledger",
@@ -86,6 +99,13 @@ export const SECTION_CONTENT: { items: Item[] }[] = [
   // ── projects ──────────────────────────────────────────────────────
   { items: [
 
+      { title: "baton", meta: "HackMIT · Sept 2026", art: "flow", image: "/media/baton.jpg",
+        bullets: [
+          "Collaborated with 3 classmates at HackMIT on a clinical shift-handoff tool that reads a patient’s chart before a shift change and flags conflicting notes, a missing code status or discharge plan, and tasks with no owner",
+          "Built the Python backend that pulls 12 record types live from hospital EHR systems via FHIR, the standard health-data format, using an LLM to tag notes and deterministic rules to decide conflicts",
+        ],
+        skills: ["Python", "FHIR", "LLMs"],
+        media: [{ type: "iframe", url: "https://batoncom.vercel.app/" }] },
       { title: "clerkflow", meta: "2025", art: "civic", image: "/media/clerkflow.jpg",
         bullets: [
           "A clerk shouldn't have to spend a weekend digging through PDFs to answer \"did we already authorize this?\" Clerkflow reads a city's raw records and builds a structured understanding of how that government actually works: people, departments, resolutions, vendors, grants, and votes assembled into a searchable knowledge graph.",
@@ -133,6 +153,9 @@ export const SECTION_CONTENT: { items: Item[] }[] = [
           "Solving Complex Problems",
           "Linear Algebra",
           "Communicating with Data",
+          "Mathematics for Computer Science",
+          "Programming in C & Assembly",
+          "Introduction to Machine Learning",
         ],
         activities: [
           { name: "MIT AppDev", role: "Marketing Chair" },
@@ -141,6 +164,10 @@ export const SECTION_CONTENT: { items: Item[] }[] = [
           { name: "Undergraduate Women in Physics" },
           { name: "Society of Women Engineers" },
           { name: "Ohms Acapella" },
+          { name: "AWS Student Builder", role: "Campus Leader" },
+          { name: "MIT Sports Summit", role: "Research Talks Organizer" },
+          { name: "MIT Global Health Alliance", role: "Projects Team" },
+          { name: "MIT Health", role: "Volunteer" },
         ],
         awards: [
           { name: "U.S. Presidential Scholar" },
@@ -149,6 +176,7 @@ export const SECTION_CONTENT: { items: Item[] }[] = [
           { name: "FIRST Robotics Dean’s List Intl Finalist" },
           { name: "Disney Dreamer" },
           { name: "NYSC Delegate" },
+          { name: "ACT: 36/36" },
         ] },
       { title: "fifa + mit sports lab", meta: "ML Research · Last Touch Project · Sept 2025 - present", art: "soccer",
         bullets: [
@@ -157,6 +185,7 @@ export const SECTION_CONTENT: { items: Item[] }[] = [
           "Assessed evaluation reliability with inter-annotator agreement, bounding label noise so the measured error reflects the model rather than the reference, the difference between a trustworthy accuracy number and a misleading one",
           "Translated the error analysis into a readiness assessment: whether last-touch timestamps are precise enough to support referee/VAR review of restart decisions (throw-ins, corners, goal kicks)",
           "Findings feed the decision to keep not-yet-ready technology out of live competition, favoring rigorous evaluation over premature deployment, a real win for research integrity in the sport",
+          "Presented the readiness assessment to FIFA leadership on whether the model’s last-touch predictions were accurate enough for the 2026 World Cup; now reevaluating with 2026 World Cup data",
         ],
         skills: ["Python", "Pandas", "Model Evaluation", "Error Analysis", "Statistical Analysis", "Inter-Annotator Agreement", "Optical Tracking", "Computer Vision"] },
       { title: "mit urban risk lab", meta: "Remote Sensing & Geospatial ML · Sept - Dec 2025", art: "geo",

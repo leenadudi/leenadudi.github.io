@@ -1,10 +1,10 @@
-/** Shared page chrome: sticky nav, content column, footer with the line band. */
+/** Shared page chrome: sticky nav (with the line band on top) and the content column. */
 import { useEffect, type CSSProperties, type ReactNode } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router";
 import { EMAIL, GITHUB, LINKEDIN, SECTIONS } from "../content";
 import { useNarrow } from "../hooks/useMediaQuery";
 import { rgba } from "../lib/color";
-import { CONTAINER, CREAM, FONT_BODY, FONT_DISPLAY, GUTTER, INK, LINE, MUTED } from "../lib/tokens";
+import { CONTAINER, CREAM, FONT_BODY, FONT_DISPLAY, GUTTER, INK, LINE } from "../lib/tokens";
 
 
 export function Container({ children, style }: { children: ReactNode; style?: CSSProperties }) {
@@ -25,7 +25,6 @@ export default function Layout() {
       <main style={{ flex: 1, paddingBottom: "clamp(3rem, 7vw, 5.5rem)" }}>
         <Outlet />
       </main>
-      <Footer />
     </div>
   );
 }
@@ -49,6 +48,7 @@ function Nav() {
       background: rgba(CREAM, 0.88), backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
       borderBottom: `1px solid ${LINE}`, paddingTop: "env(safe-area-inset-top, 0px)",
     }}>
+      <LineBand thickness={1.5} />
       <Container style={{ height: 56, display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem" }}>
         <Link to="/" style={{ fontFamily: FONT_DISPLAY, fontStyle: "italic", fontWeight: 400, fontSize: "1.05rem", color: INK, textDecoration: "none", letterSpacing: "-0.02em" }}>
           leena dudi
@@ -59,6 +59,7 @@ function Nav() {
           <a href={`mailto:${EMAIL}`} style={link}>email</a>
           <a href={GITHUB} target="_blank" rel="noreferrer" style={link}>github</a>
           <a href={LINKEDIN} target="_blank" rel="noreferrer" style={link}>linkedin</a>
+          {!narrow && <Link to="/ride" style={{ ...link, fontWeight: 600, opacity: 1 }}>take the ride →</Link>}
         </div>
       </Container>
       {narrow && (
@@ -72,26 +73,11 @@ function Nav() {
   );
 }
 
-function Footer() {
-  const narrow = useNarrow();
-  const link: CSSProperties = { fontFamily: FONT_BODY, fontSize: "0.85rem", color: INK, textDecoration: "none", opacity: 0.8 };
-  return (
-    <footer>
-      <LineBand />
-      <Container style={{
-        padding: `1.5rem ${GUTTER} calc(1.5rem + env(safe-area-inset-bottom, 0px))`,
-        display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.75rem 1.5rem",
-      }}>
-        <span style={{ fontFamily: FONT_DISPLAY, fontStyle: "italic", fontSize: "0.95rem", color: MUTED }}>leena dudi</span>
-        <div style={{ display: "flex", gap: "1.25rem", flexWrap: "wrap" }}>
-          <a href={`mailto:${EMAIL}`} style={link}>{EMAIL}</a>
-          <a href={GITHUB} target="_blank" rel="noreferrer" style={link}>github</a>
-          <a href={LINKEDIN} target="_blank" rel="noreferrer" style={link}>linkedin</a>
-          {!narrow && <Link to="/ride" style={{ ...link, color: MUTED }}>take the ride →</Link>}
-        </div>
-      </Container>
-    </footer>
-  );
+/** The five section colours, rotated so `first` leads. Pages use it to give
+ *  each entry its own colour. */
+export function palette(first: string): string[] {
+  const i = Math.max(0, SECTIONS.findIndex(s => s.color === first));
+  return SECTIONS.map((_, k) => SECTIONS[(i + k) % SECTIONS.length].color);
 }
 
 /** Small tinted label: skills, tags, awards. */
@@ -133,7 +119,7 @@ export function Bullets({ items, color, size = "0.93rem" }: { items: string[]; c
 }
 
 /** Page title block used by every section page. */
-export function PageTitle({ title, color }: { title: string; color: string }) {
+export function PageTitle({ title, id }: { title: string; id: string }) {
   return (
     <Container style={{ paddingTop: "clamp(2.5rem, 6vw, 4.5rem)", paddingBottom: "0.5rem" }}>
       <h1 style={{
@@ -142,12 +128,33 @@ export function PageTitle({ title, color }: { title: string; color: string }) {
       }}>
         {title}
       </h1>
-      <div aria-hidden style={{ width: "3.5rem", height: 4, borderRadius: 2, background: color, marginTop: "1.1rem" }} />
+      <Strands key={id} lead={id} width="9rem" style={{ marginTop: "1.1rem" }} />
     </Container>
   );
 }
 
-/** Five thin lines stacked, for the page foot. */
+/** The five section lines as a short bundle. The `lead` strand runs full
+ *  length and the others taper away from it; each grows in on mount. */
+export function Strands({ lead, width = "8rem", thickness = 3, delay = 0, style }: {
+  lead?: string; width?: string; thickness?: number; delay?: number; style?: CSSProperties;
+}) {
+  const li = SECTIONS.findIndex(s => s.id === lead);
+  return (
+    <div aria-hidden className="strands" style={{ width, display: "flex", flexDirection: "column", gap: 2, ...style }}>
+      {SECTIONS.map((s, i) => {
+        const len = li < 0 ? 100 : 100 - Math.abs(i - li) * 16;
+        return (
+          <div key={s.id} className="strand" style={{
+            width: `${len}%`, height: thickness, borderRadius: thickness, background: s.color,
+            animationDelay: `${delay + 0.1 + i * 0.07}s`,
+          }} />
+        );
+      })}
+    </div>
+  );
+}
+
+/** Five thin lines stacked, full width, along the top of the nav. */
 export function LineBand({ thickness = 4 }: { thickness?: number }) {
   return (
     <div aria-hidden style={{ display: "flex", flexDirection: "column" }}>

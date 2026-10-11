@@ -1,29 +1,35 @@
-/** Projects: screenshot beside the text, one project per row. */
+/** Projects: screenshot beside the text, one project per row, each in its
+ *  own colour, with a strand divider between rows. */
 import { lazy, Suspense, useState } from "react";
 import type { Item, Media } from "../content";
 import { useNarrow } from "../hooks/useMediaQuery";
 import { rgba } from "../lib/color";
 import { FONT_BODY, INK, LINE, MUTED } from "../lib/tokens";
-import { ArrowLink, Bullets, Chip } from "./Layout";
+import { ArrowLink, Bullets, Chip, palette } from "./Layout";
+import StrandDivider, { moveAt } from "./StrandDivider";
 
 const VibeGraphEmbed = lazy(() => import("./VibeGraphEmbed"));
 
 export default function ProjectList({ items, color }: { items: Item[]; color: string }) {
   const narrow = useNarrow();
   const [liveOpen, setLiveOpen] = useState<number | null>(null);
+  const colors = palette(color);
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       {items.map((item, i) => (
-        <Project key={i} item={item} color={color} narrow={narrow} first={i === 0}
-          liveOpen={liveOpen === i}
-          onToggleLive={item.media?.some(m => m.type === "embed") ? () => setLiveOpen(liveOpen === i ? null : i) : undefined} />
+        <div key={i}>
+          {i > 0 && <StrandDivider move={moveAt(i - 1)} at={i % 2 ? 0.7 : 0.3} style={{ margin: narrow ? "0.5rem 0" : "1rem 0" }} />}
+          <Project item={item} color={colors[i % colors.length]} narrow={narrow}
+            liveOpen={liveOpen === i}
+            onToggleLive={item.media?.some(m => m.type === "embed") ? () => setLiveOpen(liveOpen === i ? null : i) : undefined} />
+        </div>
       ))}
     </div>
   );
 }
 
-function Project({ item, color, narrow, first, liveOpen, onToggleLive }: {
-  item: Item; color: string; narrow: boolean; first: boolean; liveOpen: boolean; onToggleLive?: () => void;
+function Project({ item, color, narrow, liveOpen, onToggleLive }: {
+  item: Item; color: string; narrow: boolean; liveOpen: boolean; onToggleLive?: () => void;
 }) {
   const media = item.media ?? [];
   const site  = media.find((m): m is Extract<Media, { type: "iframe" }> => m.type === "iframe");
@@ -31,7 +37,7 @@ function Project({ item, color, narrow, first, liveOpen, onToggleLive }: {
     m.type === "link" || m.type === "paper" || m.type === "pdf");
 
   return (
-    <section style={{ padding: narrow ? "1.8rem 0" : "2.6rem 0", borderTop: first ? "none" : `1px solid ${LINE}` }}>
+    <section style={{ padding: narrow ? "1.8rem 0" : "2.6rem 0" }}>
       <div style={{
         display: "grid",
         gridTemplateColumns: narrow || !item.image ? "1fr" : "minmax(0, 0.9fr) minmax(0, 1.1fr)",
@@ -41,6 +47,7 @@ function Project({ item, color, narrow, first, liveOpen, onToggleLive }: {
           <a href={site?.url} target={site ? "_blank" : undefined} rel="noreferrer" style={{
             display: "block", aspectRatio: "16 / 10", overflow: "hidden", borderRadius: 12,
             border: `1px solid ${LINE}`, background: rgba(INK, 0.04),
+            boxShadow: `${narrow ? 7 : 12}px ${narrow ? 7 : 12}px 0 ${color}`,
           }}>
             <img src={item.image} alt={`${item.title} screenshot`} loading="lazy"
               style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top", display: "block" }} />
@@ -58,7 +65,7 @@ function Project({ item, color, narrow, first, liveOpen, onToggleLive }: {
           </div>
           {item.skills && (
             <div style={{ marginTop: "1rem", display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
-              {item.skills.map((s, j) => <Chip key={j} color={color}>{s}</Chip>)}
+              {item.skills.map((s, j) => <Chip key={j} color={color} strong>{s}</Chip>)}
             </div>
           )}
           {(site || links.length > 0 || onToggleLive) && (

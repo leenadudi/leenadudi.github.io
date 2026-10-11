@@ -3,9 +3,11 @@ import { useState } from "react";
 import type { Item } from "../content";
 import { rgba } from "../lib/color";
 import { useMediaQuery, useNarrow } from "../hooks/useMediaQuery";
-import { FONT_BODY, INK, LINE, MUTED } from "../lib/tokens";
+import { FONT_BODY, INK, MUTED } from "../lib/tokens";
+import StrandDivider from "./StrandDivider";
 import { Bullets, Chip } from "./Layout";
 import { MediaPane } from "./MediaPane";
+import Reveal from "./Reveal";
 
 export default function SchoolPage({ items, color }: { items: Item[]; color: string }) {
   const narrow = useNarrow();
@@ -21,7 +23,7 @@ export default function SchoolPage({ items, color }: { items: Item[]; color: str
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "clamp(2rem, 4vw, 3rem)", paddingBottom: "2rem" }}>
       {/* MIT */}
-      <section>
+      <Reveal as="section">
         <div style={{ display: "flex", alignItems: "baseline", gap: "0.2rem 0.9rem", flexWrap: "wrap" }}>
           <h2 style={{ fontFamily: FONT_BODY, fontWeight: 600, fontSize: "clamp(1.15rem, 1.8vw, 1.35rem)", letterSpacing: "-0.015em", margin: 0, color: INK }}>
             {mit.title}
@@ -51,16 +53,25 @@ export default function SchoolPage({ items, color }: { items: Item[]; color: str
             <div style={{ gridColumn: medium && !narrow ? "1 / -1" : undefined }}>
               <Label>awards and honors</Label>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "0.45rem" }}>
-                {mit.awards.map((a, i) => <Chip key={i} color={color} strong>{a.name}</Chip>)}
+                {mit.awards.map((a, i) => (
+                  <span key={i} style={{
+                    display: "inline-block", padding: "0.45rem 0.85rem", borderRadius: 12,
+                    fontFamily: FONT_BODY, fontWeight: 600, fontSize: "0.86rem", color: INK,
+                    background: rgba(color, i % 2 ? 0.22 : 0.4), lineHeight: 1.3,
+                  }}>
+                    {a.name}
+                  </span>
+                ))}
               </div>
             </div>
           )}
         </div>
-      </section>
+      </Reveal>
 
       {/* Research and projects */}
+      {research.length > 0 && <StrandDivider move="hump" at={0.62} />}
       {research.length > 0 && (
-        <section style={{ paddingTop: "clamp(1.5rem, 3vw, 2.25rem)", borderTop: `1px solid ${LINE}` }}>
+        <Reveal as="section">
           <Label>research and projects</Label>
           <div role="tablist" aria-label="research and projects" style={{ display: "flex", gap: "0.45rem", flexWrap: "wrap", marginBottom: "1.4rem" }}>
             {research.map((it, i) => {
@@ -83,6 +94,7 @@ export default function SchoolPage({ items, color }: { items: Item[]; color: str
             <div style={{
               display: "flex", flexDirection: narrow ? "column" : "row", gap: narrow ? "1.25rem" : "2.5rem",
               minHeight: hasVisual && !narrow ? "min(480px, 60vh)" : undefined,
+              background: rgba(color, 0.14), borderRadius: 20, padding: narrow ? "1.3rem" : "1.8rem",
             }}>
               <div style={{ width: hasVisual && !narrow ? "clamp(280px, 40%, 460px)" : "100%", flexShrink: 0 }}>
                 <h2 style={{ fontFamily: FONT_BODY, fontWeight: 600, fontSize: "1.15rem", letterSpacing: "-0.015em", margin: "0 0 0.2rem", color: INK }}>
@@ -100,7 +112,7 @@ export default function SchoolPage({ items, color }: { items: Item[]; color: str
               {iframe && <MediaPane kind="iframe" url={iframe.url} label={iframe.label ?? item.title} ink={INK} narrow={narrow} />}
             </div>
           )}
-        </section>
+        </Reveal>
       )}
     </div>
   );

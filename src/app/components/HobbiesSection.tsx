@@ -5,6 +5,7 @@ import type { Topology } from "topojson-specification";
 import { rgba } from "../lib/color";
 import { useNarrow } from "../hooks/useMediaQuery";
 import { FONT_BODY, INK, LINE, MUTED } from "../lib/tokens";
+import Reveal from "./Reveal";
 
 // ── Static content ────────────────────────────────────────────────────────────
 
@@ -196,25 +197,24 @@ function Globe({ ink }: { ink: string }) {
 export default function HobbiesSection({ color }: { color: string }) {
   const narrow = useNarrow();
   const ink = INK;
-  void color;
   const box: React.CSSProperties = { display: "flex", flexDirection: "column", minWidth: 0 };
   return (
     <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1.2fr 1fr", gap: narrow ? "2rem" : "2.5rem 3rem", paddingBottom: "2rem" }}>
 
       {/* Basketball essay */}
-      <div style={box}>
+      <Reveal style={{ ...box, background: rgba(color, 0.22), borderRadius: 20, padding: narrow ? "1.4rem 1.3rem" : "1.8rem 1.9rem" }}>
         <Label>basketball</Label>
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.9rem", maxWidth: "62ch" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.9rem", maxWidth: "58ch" }}>
           {BASKETBALL_ESSAY.map((para, i) => (
-            <p key={i} style={{ margin: 0, fontFamily: FONT_BODY, fontSize: "0.98rem", lineHeight: 1.7, color: ink }}>
+            <p key={i} style={{ margin: 0, color: ink, fontFamily: FONT_BODY, fontSize: "1.02rem", lineHeight: 1.7 }}>
               {para}
             </p>
           ))}
         </div>
-      </div>
+      </Reveal>
 
       {/* Globe */}
-      <div style={{ ...box, minHeight: narrow ? undefined : 320 }}>
+      <Reveal delay={0.08} style={{ ...box, minHeight: narrow ? undefined : 320 }}>
         <Label>travel · drag to explore</Label>
         <div style={{
           flex: narrow ? "none" : 1,
@@ -223,7 +223,7 @@ export default function HobbiesSection({ color }: { color: string }) {
         }}>
           <Globe ink={ink} />
         </div>
-      </div>
+      </Reveal>
 
       {/* Reading */}
       <div style={box}>
@@ -238,28 +238,26 @@ export default function HobbiesSection({ color }: { color: string }) {
         </div>
       </div>
 
-      {/* Albums */}
-      <div style={box}>
+      {/* Albums: a wall of covers */}
+      <Reveal style={{ ...box, gridColumn: narrow ? undefined : "1 / -1" }}>
         <Label>favorite albums</Label>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.55rem 0.9rem" }}>
+        <div style={{ display: "grid", gridTemplateColumns: narrow ? "repeat(3, 1fr)" : "repeat(5, 1fr)", gap: "0.9rem" }}>
           {ALBUMS.map((album, i) => (
-            <div key={i} style={{ display: "flex", alignItems: "center", gap: "0.55rem", minWidth: 0 }}>
+            <div key={i} className="album" style={{ minWidth: 0 }}>
               {album.cover ? (
                 <img src={album.cover} alt="" loading="lazy"
-                  style={{ width: 34, height: 34, borderRadius: 5, objectFit: "cover", flexShrink: 0 }} />
+                  style={{ width: "100%", aspectRatio: "1", borderRadius: 10, objectFit: "cover", display: "block", boxShadow: `0 10px 24px -14px ${rgba(ink, 0.5)}` }} />
               ) : (
-                <div style={{ width: 34, height: 34, borderRadius: 5, flexShrink: 0, background: rgba(ink, 0.1) }} />
+                <div style={{ width: "100%", aspectRatio: "1", borderRadius: 10, background: rgba(ink, 0.1) }} />
               )}
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontFamily: FONT_BODY, fontWeight: 600, fontSize: "0.82rem", color: ink, lineHeight: 1.25, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {album.title}
-                </div>
-                <div style={{ fontFamily: FONT_BODY, fontSize: "0.74rem", color: MUTED, lineHeight: 1.25 }}>{album.artist}</div>
+              <div style={{ fontFamily: FONT_BODY, fontWeight: 600, fontSize: "0.8rem", color: ink, lineHeight: 1.25, marginTop: "0.5rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {album.title}
               </div>
+              <div style={{ fontFamily: FONT_BODY, fontSize: "0.72rem", color: MUTED, lineHeight: 1.25 }}>{album.artist}</div>
             </div>
           ))}
         </div>
-      </div>
+      </Reveal>
     </div>
   );
 }

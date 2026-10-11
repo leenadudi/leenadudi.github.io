@@ -3,9 +3,9 @@
 import { Link } from "react-router";
 import { EMAIL, SECTIONS } from "../content";
 import { useNarrow } from "../hooks/useMediaQuery";
-import { CREAM, FONT_BODY, FONT_DISPLAY, INK, MUTED, STRIPE } from "../lib/tokens";
+import { CREAM, FONT_BODY, FONT_DISPLAY, INK, MUTED } from "../lib/tokens";
 import { phase1Path, SW } from "../Ride";
-import { Container } from "../components/Layout";
+import { Container, Strands } from "../components/Layout";
 
 export default function Home() {
   const narrow = useNarrow();
@@ -28,7 +28,7 @@ export default function Home() {
             }}>
               leena dudi
             </h1>
-            <div aria-hidden style={{ height: 4, width: "min(100%, 22rem)", background: STRIPE, borderRadius: 2, margin: "1.25rem 0 1.4rem" }} />
+            <Strands width="min(100%, 22rem)" style={{ margin: "1.25rem 0 1.4rem" }} />
             <p style={{ margin: 0, fontFamily: FONT_BODY, fontSize: "clamp(1rem, 1.6vw, 1.15rem)", lineHeight: 1.6, color: INK }}>
               computer science and engineering at MIT, class of 2029
             </p>
