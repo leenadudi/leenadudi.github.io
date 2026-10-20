@@ -69,7 +69,7 @@ export default function SchoolPage({ items, color }: { items: Item[]; color: str
       </Reveal>
 
       {/* Research and projects */}
-      {research.length > 0 && <StrandDivider move="hump" at={0.62} />}
+      {research.length > 0 && <StrandDivider move="twist" at={0.6} />}
       {research.length > 0 && (
         <Reveal as="section">
           <Label>research and projects</Label>

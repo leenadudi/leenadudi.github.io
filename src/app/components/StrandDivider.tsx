@@ -1,13 +1,13 @@
 /** Five strands across the column, used between entries in place of a
  *  hairline. Each divider makes one move from the ride (a loop, a wave, a
- *  hump) and draws itself in when it scrolls into view. */
+ *  twist) and draws itself in when it scrolls into view. */
 import { motion, useReducedMotion } from "motion/react";
 import { SECTIONS } from "../content";
 import { useNarrow } from "../hooks/useMediaQuery";
 import { CREAM } from "../lib/tokens";
 
-export type Move = "loop" | "wave" | "hump";
-const MOVES: Move[] = ["loop", "wave", "hump"];
+export type Move = "loop" | "wave" | "twist";
+const MOVES: Move[] = ["loop", "wave", "twist"];
 export const moveAt = (i: number): Move => MOVES[i % MOVES.length];
 
 const K   = 0.5523;     // cubic-bezier circle constant
@@ -41,15 +41,18 @@ function path(move: Move, i: number, W: number, at: number): string {
     }
     return d;
   }
-  // hump: flat, sweep up to a crest, run along it, drop back down
-  const a = W * at - W * 0.22, b = W * at + W * 0.22, top = y - 64;
-  return [
-    `M 0,${y} L ${a - 90},${y}`,
-    `C ${a - 30},${y} ${a - 30},${top} ${a + 40},${top}`,
-    `L ${b - 40},${top}`,
-    `C ${b + 30},${top} ${b + 30},${y} ${b + 90},${y}`,
-    `L ${W},${y}`,
-  ].join(" ");
+  // twist: each strand is a sine with its own phase under a bell envelope,
+  // so the five braid over and under each other in the middle and run
+  // flat and parallel at both ends (the ride's coil, in miniature)
+  const mid = Y0 + 2 * GAP, A = 34, span = W * 0.5, c = W * at;
+  const pts: string[] = [];
+  for (let x = 0; x <= W; x += 6) {
+    const t = Math.min(1, Math.abs(x - c) / (span / 2));
+    const env = t >= 1 ? 0 : (1 + Math.cos(Math.PI * t)) / 2;
+    const yy = mid + (y - mid) * (1 - env) + A * env * Math.sin(((x - c) / span) * 4 * Math.PI + (i * 2 * Math.PI) / 5);
+    pts.push(`${x},${yy.toFixed(1)}`);
+  }
+  return `M ${pts.join(" L ")}`;
 }
 
 export default function StrandDivider({ move = "loop", at = 0.5, style }: {
@@ -72,8 +75,8 @@ export default function StrandDivider({ move = "loop", at = 0.5, style }: {
         return (
           <g key={s.id}>
             {/* cream underlay so crossings read as one strand passing over another */}
-            <motion.path d={d} stroke={CREAM} strokeWidth={SW + 4} fill="none" strokeLinecap="round" {...draw} />
-            <motion.path d={d} stroke={s.color} strokeWidth={SW} fill="none" strokeLinecap="round" {...draw} />
+            <motion.path d={d} stroke={CREAM} strokeWidth={SW + 4} fill="none" strokeLinecap="round" strokeLinejoin="round" {...draw} />
+            <motion.path d={d} stroke={s.color} strokeWidth={SW} fill="none" strokeLinecap="round" strokeLinejoin="round" {...draw} />
           </g>
         );
       })}

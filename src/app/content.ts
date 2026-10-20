@@ -114,14 +114,6 @@ export const SECTION_CONTENT: { items: Item[] }[] = [
         ],
         skills: ["Python", "Flask", "Claude", "pgvector", "Neo4j", "PostgreSQL"],
         media: [{ type: "iframe", url: "https://council-knowledge-base.vercel.app/" }] },
-      { title: "leena's music brain", meta: "2025", art: "vibegraph", image: "/media/musicbrain.jpg",
-        bullets: [
-          "Pulled five years of Spotify streaming history and enriched ~2,000 tracks with nine audio features (ReccoBeats API), cached in SQLite",
-          "Maps the whole library with seeded UMAP so on-screen distance means real audio similarity, coloured along a continuous calm→hype spectrum (PCA)",
-          "Interactive Canvas viz: a biplot \"vibe compass\" showing which trait rises in each direction, and click any track to surface its nearest neighbours with a 9-axis radar",
-        ],
-        skills: ["TypeScript", "React", "SQLite", "UMAP", "PCA", "Louvain", "Canvas 2D"],
-        media: [{ type: "embed", kind: "vibegraph" }] },
       { title: "wyrather", meta: "2025", art: "route",
         bullets: [
           "Daily \"would you rather\" polls with real-time head-to-head debates, where users vote, see live split counts, then enter a matchmaking queue to argue against someone who voted the opposite way",
