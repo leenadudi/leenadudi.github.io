@@ -158,7 +158,6 @@ export const SECTION_CONTENT: { items: Item[] }[] = [
           "Introduction to Machine Learning",
         ],
         activities: [
-          { name: "MIT AppDev", role: "Marketing Chair" },
           { name: "Women in AI", role: "Resources Lead", description: "Curates AI/ML learning resources, scholarship and grant opportunities for members and the broader community; updates the website with new resources; coordinates intro AI/ML workshops alongside the professional development team" },
           { name: "Women in EECS" },
           { name: "Undergraduate Women in Physics" },

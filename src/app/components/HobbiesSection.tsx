@@ -215,7 +215,7 @@ export default function HobbiesSection({ color }: { color: string }) {
 
       {/* Globe */}
       <Reveal delay={0.08} style={{ ...box, minHeight: narrow ? undefined : 320 }}>
-        <Label>travel · drag to explore</Label>
+        <Label>travel (in progress) · drag to explore</Label>
         <div style={{
           flex: narrow ? "none" : 1,
           height: narrow ? "min(80vw, 340px)" : undefined,
