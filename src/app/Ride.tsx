@@ -502,7 +502,7 @@ export default function Ride() {
               fontSize: "clamp(0.85rem,1.5vw,1.05rem)", color: "#000000", opacity: 0.85,
               letterSpacing: "0.01em",
             }}>
-              computer science at MIT · class of 2029
+              computer science at MIT
             </p>
             <a href={`mailto:${EMAIL}`} style={{
               pointerEvents: "auto",

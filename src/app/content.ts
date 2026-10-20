@@ -144,7 +144,7 @@ export const SECTION_CONTENT: { items: Item[] }[] = [
 
   // ── school ────────────────────────────────────────────────────────
   { items: [
-      { title: "Massachusetts Institute of Technology", meta: "B.S. Computer Science and Engineering · Class of 2029", art: "dome",
+      { title: "Massachusetts Institute of Technology", meta: "B.S. Computer Science and Engineering", art: "dome",
         bullets: [
           "Intro to Programming & CS",
           "Fundamentals of Programming",

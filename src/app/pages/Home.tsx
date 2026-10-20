@@ -30,7 +30,7 @@ export default function Home() {
             </h1>
             <Strands width="min(100%, 22rem)" style={{ margin: "1.25rem 0 1.4rem" }} />
             <p style={{ margin: 0, fontFamily: FONT_BODY, fontSize: "clamp(1rem, 1.6vw, 1.15rem)", lineHeight: 1.6, color: INK }}>
-              computer science and engineering at MIT, class of 2029
+              computer science and engineering at MIT
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "0.75rem 1.25rem", marginTop: "1.6rem" }}>
               <a href={`mailto:${EMAIL}`} style={{
